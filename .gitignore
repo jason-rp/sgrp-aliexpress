@@ -3,3 +3,13 @@
 ################################################################################
 
 /SGRP.Aliexpress/ConsoleApp1/bin/Debug/netcoreapp2.2
+/SGRP.Aliexpress/ConsoleApp1/obj
+/SGRP.Aliexpress/SGRP.Aliexpress.Bussiness/bin/Debug/netcoreapp2.2
+/SGRP.Aliexpress/SGRP.Aliexpress.Bussiness/obj/Debug/netcoreapp2.2
+/SGRP.Aliexpress/SGRP.Aliexpress.CrawlService/obj/Debug/netcoreapp3.1
+/SGRP.Aliexpress/SGRP.Aliexpress.CrawlService/obj
+/SGRP.Aliexpress/SGRP.Aliexpress.Data/bin/Debug/netcoreapp2.2
+/SGRP.Aliexpress/SGRP.Aliexpress.Data/obj/Debug/netcoreapp2.2
+/SGRP.Aliexpress/SGRP.Aliexpress.Data/obj
+/SGRP.Aliexpress/SGRP.Aliexpress.Bussiness/obj
+/SGRP.Aliexpress/.vs/SGRP.Aliexpress/v16

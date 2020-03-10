@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
+using HtmlAgilityPack;
 using SGRP.Aliexpress.CrawlService.Interfaces;
 using SGRP.Aliexpress.Data;
 
@@ -20,7 +22,7 @@ namespace SGRP.Aliexpress.CrawlService
 
             var data = _crawlService.GetData(new List<string>
             {
-                "https://www.aliexpress.com/category/100003415/patches.html?trafficChannel=main&catName=patches&CatId=100003415&ltype=wholesale&SortType=default&page=1&isrefine=y"
+                $"https://www.aliexpress.com/category/100003415/patches.html?trafficChannel=main&catName=patches&CatId=100003415&ltype=wholesale&SortType=default&page=1&isrefine=y"
             }).ToList();
 
             Console.WriteLine("\r\nPress any key to continue ...");

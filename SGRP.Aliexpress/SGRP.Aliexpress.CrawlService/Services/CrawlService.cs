@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
@@ -23,10 +24,12 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
         public List<UserInfoViewModel> GetData(List<string> urls)
         {
+
+            GetLoginUrlFromCategory(urls[0]);
             var pid = 1;
             var result = new List<UserInfoViewModel>();
             var htmlDocument = new HtmlDocument();
-            var cookies = Node("index.js", "\"" + -109 + "\"" + " \"" + urls[0] + "\"" + " \"" + GetRandomMailPass(Random) + "\"", ref pid);
+            var cookies = Node("nodescript.js", "\"" + -109 + "\"" + " \"" + urls[0] + "\"" + " \"" + GetRandomMailPass(Random) + "\"", ref pid);
             //foreach (var url in urls)
             //{
             //    var rawData = _requestServices.RequestUrl(url: url, cookies: cookie);
@@ -48,6 +51,24 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
 
             return result;
+        }
+
+        public  void GetLoginUrlFromCategory(string url)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                using (HttpResponseMessage response = client.GetAsync(url).Result)
+                {
+                    using (HttpContent content = response.Content)
+                    {
+                        string result = content.ReadAsStringAsync().Result;
+                        HtmlDocument document = new HtmlDocument();
+                        document.LoadHtml(result);
+                        var nodes = document.DocumentNode.SelectNodes("Your nodes");
+                        //Some work with page....
+                    }
+                }
+            }
         }
 
         private UserInfoViewModel GetDetailData(string detailUrl)

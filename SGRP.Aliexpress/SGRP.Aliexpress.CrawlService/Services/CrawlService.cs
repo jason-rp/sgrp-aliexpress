@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
+using SGRP.Aliexpress.Bussiness.Models;
 using SGRP.Aliexpress.Bussiness.ViewModel;
 using SGRP.Aliexpress.CrawlService.Interfaces;
 
@@ -14,61 +15,64 @@ namespace SGRP.Aliexpress.CrawlService.Services
     public class CrawlService : ICrawlService
     {
         private static readonly Random Random = new Random();
-        private readonly string cookie = string.Empty;
+        
 
-        public CrawlService()
+        public List<CategoryViewModel> GetData(List<InputUrlModel> urls)
         {
-            //ChilkatService.ActiveChilKat();
-
-        }
-
-        public List<UserInfoViewModel> GetData(List<string> urls)
-        {
-
-            GetLoginUrlFromCategory(urls[0]);
             var pid = 1;
-            var result = new List<UserInfoViewModel>();
-            var htmlDocument = new HtmlDocument();
-            var cookies = Node("nodescript.js", "\"" + -109 + "\"" + " \"" + urls[0] + "\"" + " \"" + GetRandomMailPass(Random) + "\"", ref pid);
-            //foreach (var url in urls)
-            //{
-            //    var rawData = _requestServices.RequestUrl(url: url, cookies: cookie);
-            //    var collection = htmlDocument.DocumentNode.SelectNodes("//script");
-            //    if (collection.Count == 1)
-            //    {
-            //        var loginUrl = new Regex("location.href=\"(.*?)\"\\)").Match(collection[0].InnerHtml)
-            //            .Groups[1].Value.Trim() + "\")";
-            //        loginUrl = FilterUrl(loginUrl);
-            //        var cookies = Node("index.js", "\"" + -109 + "\"" + " \"" + loginUrl + "\"" + " \"" + GetRandomMailPass(Random) + "\"", ref pid);
-            //        if (cookies.Count == 1)
-            //        {
-            //            var json = JsonConvert.DeserializeObject(cookies[0]);
+            var result = new List<CategoryViewModel>();
 
-            //        }
-            //    }
-            //}
+            foreach (var url in urls)
+            {
+                var viewModel = new CategoryViewModel
+                {
+                    CategoryId = url.Id,
+                    CategoryName = "test"
+                };
 
+                var executeNodeResult = Node("nodescript.js",
+                    "\"" + -101 + "\"" + " \"" + GetLoginUrlFromCategory(url) + "\"" + " \"" + url.Id + "\"" + " \"" +
+                    GetRandomMailPass(Random) + "\"", ref pid);
+
+                if (executeNodeResult.Count == 1)
+                {
+                    var rawData = JsonConvert.DeserializeObject<List<ProductDetailModel>>(executeNodeResult[0]);
+                }
+            }
 
 
             return result;
         }
 
-        public  void GetLoginUrlFromCategory(string url)
+        public List<UserInfoViewModel> GetData(List<StoreViewModel> urls)
         {
-            using (HttpClient client = new HttpClient())
+            var result = new List<UserInfoViewModel>();
+
+            return result;
+        }
+
+
+        public string GetLoginUrlFromCategory(InputUrlModel model)
+        {
+            string result;
+            using (var client = new HttpClient())
             {
-                using (HttpResponseMessage response = client.GetAsync(url).Result)
+                using (var response = client.GetAsync(model.Url).Result)
                 {
-                    using (HttpContent content = response.Content)
+                    using (var content = response.Content)
                     {
-                        string result = content.ReadAsStringAsync().Result;
-                        HtmlDocument document = new HtmlDocument();
+                        result = content.ReadAsStringAsync().Result;
+                        var document = new HtmlDocument();
                         document.LoadHtml(result);
-                        var nodes = document.DocumentNode.SelectNodes("Your nodes");
-                        //Some work with page....
+                        var collection = document.DocumentNode.SelectNodes("//script");
+                        if (collection.Count != 1) return result;
+                        var loginUrl = new Regex("location.href=\"(.*?)\"\\)").Match(collection[0].InnerHtml)
+                                           .Groups[1].Value.Trim() + "\")";
+                        result = FilterUrl(loginUrl);
                     }
                 }
             }
+            return result;
         }
 
         private UserInfoViewModel GetDetailData(string detailUrl)
@@ -103,10 +107,10 @@ namespace SGRP.Aliexpress.CrawlService.Services
         }
 
         public static List<string> Node(string fileName, string command, ref int pId, string dir = "Node",
-    int Ms = 0)
+            int timeout = 0)
         {
-            var isDebug = true;
-            var ms = 60000;
+            var isDebug = false;
+
             var result = new List<string>();
             try
             {
@@ -130,7 +134,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                     process.StartInfo = __Proc_Start_Info;
                     if (!isDebug)
                     {
-                        process.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                        process.OutputDataReceived += delegate(object sender, DataReceivedEventArgs args)
                         {
                             lock (result)
                             {
@@ -141,6 +145,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                             }
                         };
                     }
+
                     process.Start();
                     if (!isDebug)
                     {
@@ -149,9 +154,9 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
                     pId = process.Id;
 
-                    if (ms > 0)
+                    if (timeout > 0)
                     {
-                        process.WaitForExit(ms);
+                        process.WaitForExit(timeout);
                     }
                     else
                     {

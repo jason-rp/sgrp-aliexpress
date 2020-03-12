@@ -5,7 +5,8 @@ const __Chrome = require('puppeteer-core');
 let Args = process.argv.slice(2);
 var _loginCase = parseInt(Args[0]);
 var __loginUrl = Args[1];
-var __Mp = Args[2];
+var _loginUrlId = Args[2];
+var __Mp = Args[3];
 
 
 var cookie_all;
@@ -18,19 +19,19 @@ const __Set_TOut = function (ms) {
 };
 
 const __Server = __Apache.createServer(((req, res) => {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('sgannon72@gmail.com|freedom2010');
 }));
 
 const __Server_2 = __Apache.createServer(((req, res) => {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('127.0.0.1:8878');
 }));
 
-__Server.listen(8044, () =>{
+__Server.listen(8044, () => {
 });
 
-__Server_2.listen(8199, () =>{
+__Server_2.listen(8199, () => {
 });
 
 __Http.get('http://127.0.0.1:8044/').then((res) => {
@@ -41,14 +42,13 @@ __Http.get('http://127.0.0.1:8044/').then((res) => {
     }).then(() => {
 
         (async () => {
-            if(_loginCase === -109){
+            if (_loginCase === -101) {
                 await registerNewAccount();
             }
-            else if(_loginCase == -107)
-            {
+            else if (_loginCase == -107) {
                 await slideCapcha();
             }
-            else if(_loginCase == -101){
+            else if (_loginCase == -109) {
                 await getDetailCookie();
             }
         })();
@@ -63,8 +63,7 @@ __Http.get('http://127.0.0.1:8044/').then((res) => {
 let __Width = 1600;
 let __Height = 900;
 
-const registerNewAccount = async ()=>
-{
+const registerNewAccount = async () => {
     let __UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36';
     let __Email = __Mp.split("|")[0].trim();
     let __Password = __Mp.split("|")[1].trim();
@@ -81,7 +80,7 @@ const registerNewAccount = async ()=>
     await page.goto(__loginUrl);
 
     const [_tabRegister] = await page.$x('//*[@id="expressbuyerlogin"]/div/div[2]/div[1]/div/ul/li[1]/div');
-    if(_tabRegister){
+    if (_tabRegister) {
         await _tabRegister.click();
     }
 
@@ -89,94 +88,153 @@ const registerNewAccount = async ()=>
     if (__Username) {
         await __Username.click();
     }
-    await page.type('#expressbuyerlogin > div > div.next-tabs.next-tabs-pure > div.next-tabs-content > div.next-tabs-tabpane.active > div > div > div > div.batman-join > div:nth-child(1) > input',__Email, {delay: 20});
-  
+    await page.type('#expressbuyerlogin > div > div.next-tabs.next-tabs-pure > div.next-tabs-content > div.next-tabs-tabpane.active > div > div > div > div.batman-join > div:nth-child(1) > input', __Email, { delay: 20 });
+
     const [__Pwd] = await page.$x('//*[@id="expressbuyerlogin"]/div/div[2]/div[2]/div[1]/div/div/div/div[4]/div[2]/input');
     if (__Pwd) {
         await __Pwd.click();
     }
-    await page.type('#expressbuyerlogin > div > div.next-tabs.next-tabs-pure > div.next-tabs-content > div.next-tabs-tabpane.active > div > div > div > div.batman-join > div:nth-child(2) > input', __Password, {delay: 20});
+    await page.type('#expressbuyerlogin > div > div.next-tabs.next-tabs-pure > div.next-tabs-content > div.next-tabs-tabpane.active > div > div > div > div.batman-join > div:nth-child(2) > input', __Password, { delay: 20 });
 
     const [__Signin] = await page.$x('//*[@id="expressbuyerlogin"]/div/div[2]/div[2]/div[1]/div/div/div/div[4]/div[5]/a');
     if (__Signin) {
         await __Signin.click();
     }
     await __Set_TOut(3000);
-    
-    
-    // await page.goto('https://www.aliexpress.com/category/100003415/patches.html');
-    // await __Set_TOut(5000);
-    
+
     //get all item in each category
     var rpss = [];
-    for(var j = 1; j <= 60; j++)
-    {
-        var urlItem = "https://www.aliexpress.com/category/100003415/patches.html?trafficChannel=main&catName=patches&CatId=100003415&ltype=wholesale&SortType=default&page="
-                        + j +"&isrefine=y";
-        await page.goto(urlItem);
-        await __Set_TOut(5000);
+    for (var j = 1; j <= 1; j++) {
+        var crawlItem = {
+            categoryId: -1,
+            categoryName: "",
+            pathCategories: "",
+            productId: -1,
+            productName: "",
+            productSkuProps: ""
+        };
+
+        var urlItem = 'https://www.aliexpress.com/category/' + _loginUrlId + '/patches.html?trafficChannel=main&catName=patches&CatId='
+            + _loginUrlId + '&ltype=wholesale&SortType=default&page='
+            + j + '&isrefine=y';
+        await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
+
+        try {
+            //get categoryName
+            var redifineCategory = await page.evaluate(() => {
+                return window.runParams.refineCategory;
+            });
+
+            if (redifineCategory.length > 0) {
+                crawlItem.categoryName = redifineCategory[0].categoryName;
+                var pthCategory = "";
+                if (redifineCategory[0].pathCategories.length > 0) {
+                    for (var g in redifineCategory[0].pathCategories) {
+                        if (pthCategory === "") {
+                            pthCategory += redifineCategory[0].pathCategories[g].categoryEnName;
+                        }
+                        else {
+                            pthCategory += "|" + redifineCategory[0].pathCategories[g].categoryEnName;
+                        }
+                    }
+                }
+            }
+        }
+        catch (ex) {
+            console.log("Error: " + ex);
+            await __Set_TOut(80000);
+            break;
+        }
 
         var runParams = await page.evaluate(() => {
             return window.runParams.items;
-          });
+        });
+
         for (var i in runParams) {
-            try{
+            try {
                 var item = runParams[i];
-                await page.goto('https:' + item.productDetailUrl);
-                await __Set_TOut(2000);
+                await page.goto('https:' + item.productDetailUrl, { waitUntil: 'domcontentloaded' });
+
                 var windowrunParams = await page.evaluate(() => {
-                    return window.runParams === undefined ? "udfi" :  window.runParams;
+                    return window.runParams === undefined ? "udfi" : window.runParams;
                 });
-                if(windowrunParams ===  "udfi"){
-                //1. login again
-                
-                const [__Username_a] = await page.$x('//*[@id="fm-login-id"]');
-                if (__Username_a) {
-                    console.log("loi login");
-                    await __Username_a.click();
-                    await page.type('input[id="fm-login-id"]', __Email, {delay: 20});
-                    const [__Pwd_b] = await page.$x('//*[@id="fm-login-password"]');
-                    await __Pwd_b.click();
-                    await page.type('input[id="fm-login-password"]', __Password, {delay: 20});
-                    const [__Signin_c] = await page.$x('//*[@id="login-form"]/div[5]/button');
-                    await __Signin_c.click();
+
+                if (windowrunParams === "udfi") {
+                    const [__Username_a] = await page.$x('//*[@id="fm-login-id"]');
+                    if (__Username_a) {
+                        console.log("loi login");
+                        await __Username_a.click();
+                        await page.type('input[id="fm-login-id"]', __Email, { delay: 20 });
+                        const [__Pwd_b] = await page.$x('//*[@id="fm-login-password"]');
+                        await __Pwd_b.click();
+                        await page.type('input[id="fm-login-password"]', __Password, { delay: 20 });
+                        const [__Signin_c] = await page.$x('//*[@id="login-form"]/div[5]/button');
+                        await __Signin_c.click();
+                    }
+                    else {
+                        console.log("loi slide");
+                        await page.waitForSelector('.nc_iconfont.btn_slide');
+                        let sliderElement = await page.$('.slidetounlock');
+                        let slider = await sliderElement.boundingBox();
+
+                        let slideHandle = await page.$('.nc_iconfont.btn_slide');
+                        let handle = await slideHandle.boundingBox();
+
+                        await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+                        await page.mouse.down();
+                        await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
+                        await page.mouse.up();
+                        await __Set_TOut(3000);
+                    }
                 }
-                else{
-                    console.log("loi slide");
-                    await page.waitForSelector('.nc_iconfont.btn_slide');
-                    let sliderElement = await page.$('.slidetounlock');
-                    let slider = await sliderElement.boundingBox();
-                
-                    let slideHandle = await page.$('.nc_iconfont.btn_slide');
-                    let handle = await slideHandle.boundingBox();
-                
-                    await page.mouse.move(handle.x + handle.width/2, handle.y + handle.height/2);
-                    await page.mouse.down();
-                    await page.mouse.move(handle.x + slider.width, handle.y + handle.height/2,{steps:50});
-                    await page.mouse.up();
-                    await __Set_TOut(3000);
-                }
-                }
-                else
-                {
-                    rpss.push({
-                        title: windowrunParams.data.pageModule.title
-                      });
+                else {
+
+                    //get color
+                    if (windowrunParams.data.skuModule.hasSkuProperty == true) {
+                        var skuStr = "";
+                        for (var prop in windowrunParams.data.skuModule.productSKUPropertyList) {
+                            var currentProp = windowrunParams.data.skuModule.productSKUPropertyList[prop];
+                            skuStr += currentProp.skuPropertyName + ":";
+                            var skuItems = currentProp.skuPropertyValues;
+                            for (var skuItem in skuItems) {
+                                skuStr += skuStr === "" ? skuItems[skuItem].propertyValueDisplayName : "|" + skuItems[skuItem].propertyValueDisplayName;
+                            }
+                            skuStr += "::";
+                        }
+                        crawlItem.productSkuProps = skuStr;
+                    }
+
+
+                    crawlItem.categoryId = windowrunParams.data.commonModule.categoryId;
+                    crawlItem.productId = windowrunParams.data.commonModule.productId;
+                    crawlItem.productName = windowrunParams.data.titleModule.subject;
+
+                    //get description
+                    //const data = await page.evaluate(() => document.querySelector('.detailmodule_html').outerHTML);
+                    const data = await page.$$eval('.detailmodule_html', items => items.map(item => item.innerText));
+
+                    console.log(data[0]);
+                    break;
+
+
+                    //end crawl
+                    rpss.push(crawlItem);
                 }
 
             }
-            catch(ex){
-                console.log("LOI ME GI ROI" +ex);
+            catch (ex) {
+                console.log("Error: " + ex);
+                console.log(item.productDetailUrl);
                 await __Set_TOut(80000);
                 break;
             }
         }
     }
     console.log(JSON.stringify(rpss));
-   process.exit(0);
-   //await browser.close();
+    process.exit(0);
+    //await browser.close();
 }
-const slideCapcha = async()=>{
+const slideCapcha = async () => {
     let __UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36';
     const browser = await __Chrome.launch({
         executablePath: './chromium/chrome.exe',
@@ -196,17 +254,16 @@ const slideCapcha = async()=>{
     let slideHandle = await page.$x('//*[@id="nc_1_n1z"]');
     let handle = await slideHandle.boundingBox();
 
-    await page.mouse.move(handle.x + handle.width/2, handle.y + handle.height/2);
+    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
     await page.mouse.down();
-    await page.mouse.move(handle.x + slider.width, handle.y + handle.height/2,{steps:50});
+    await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
     await page.mouse.up();
 
 
     await __Set_TOut(5000000);
 };
 
-const getDetailCookie = async ()=>
-{
+const getDetailCookie = async () => {
     let __UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36';
 
     const browser = await __Chrome.launch({
@@ -225,29 +282,28 @@ const getDetailCookie = async ()=>
         const cookiesSet = await page.cookies(page.url());
         cookie_all = "";
         cookiesSet.forEach(get_all_cookie);
-    
+
         console.log("DetailCookie|" + cookie_all);
     }
-    else
-    {
+    else {
         const [__slider] = await page.$x('//*[@id="nc_1__scale_text"]/span');
-        if(__slider){
+        if (__slider) {
             //console.log("Slider|");
             let sliderElement = await page.$x('//*[@id="nc_1__scale_text"]/span');
             let slider = await sliderElement.boundingBox();
-        
+
             let slideHandle = await page.$x('//*[@id="nc_1_n1z"]');
             let handle = await slideHandle.boundingBox();
-        
-            await page.mouse.move(handle.x + handle.width/2, handle.y + handle.height/2);
+
+            await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
             await page.mouse.down();
-            await page.mouse.move(handle.x + slider.width, handle.y + handle.height/2,{steps:50});
+            await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
             await page.mouse.up();
-        
-        
+
+
             await __Set_TOut(5000000);
         }
-        
+
     }
 
 
@@ -265,8 +321,7 @@ const runThreads = async (__Mp, __Proxy) => {
 
     console.log(__Email + ' ' + __Password + ' ' + __IP_Port + ' ' + __UA);
 
-    try
-    {
+    try {
         const browser = await __Chrome.launch({
             executablePath: './chrome-win/chrome.exe',
             /*executablePath: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",*/
@@ -285,13 +340,13 @@ const runThreads = async (__Mp, __Proxy) => {
         }
         /*__Email = "elaineymendozag0fzx@yahoo.com";
         __Password = "Abc123!@#";*/
-        await page.type('input[id="username"]', __Email, {delay: 20});
+        await page.type('input[id="username"]', __Email, { delay: 20 });
 
         const [__Pwd] = await page.$x('//*[@id="password"]');
         if (__Pwd) {
             await __Pwd.click();
         }
-        await page.type('input[id="password"]', __Password, {delay: 20});
+        await page.type('input[id="password"]', __Password, { delay: 20 });
 
         // Click Signin
         const [__Signin] = await page.$x('//*[@id="content"]/div[2]/div/div/div/div/div[1]/form/div[6]/div/span/div/button');
@@ -304,14 +359,12 @@ const runThreads = async (__Mp, __Proxy) => {
         let __Stayon = false;
 
         // Promises Will Check Stay on Page Or ReDirect To Reject
-        const __Promise_Find_Default = new Promise(function(resolve, reject) {
-            setTimeout(function() {
-                if (page.url() === 'https://www.starbucks.com/account/signin')
-                {
+        const __Promise_Find_Default = new Promise(function (resolve, reject) {
+            setTimeout(function () {
+                if (page.url() === 'https://www.starbucks.com/account/signin') {
                     resolve("Result-Error");
                 }
-                else if (page.url() === 'https://app.starbucks.com/' || page.url() === 'https://app.starbucks.com' || page.url() === 'https://starbucks.com/' || page.url() === 'https://starbucks.com')
-                {
+                else if (page.url() === 'https://app.starbucks.com/' || page.url() === 'https://app.starbucks.com' || page.url() === 'https://starbucks.com/' || page.url() === 'https://starbucks.com') {
                     resolve("Reject");
                 }
                 {
@@ -324,77 +377,64 @@ const runThreads = async (__Mp, __Proxy) => {
             page.waitForNavigation({ waitUntil: "networkidle0", timeout: 120000 }),
             page.waitForNavigation({ waitUntil: "networkidle2", timeout: 120000 }),
             __Promise_Find_Default
-        ]).then(function(result) {
-            if (result === 'Reject')
-            {
+        ]).then(function (result) {
+            if (result === 'Reject') {
                 __Reject_FingerPrint = true;
             }
-            else if (result === 'Result-Error')
-            {
+            else if (result === 'Result-Error') {
                 __Stayon = true;
             }
-        }, function(err) {
+        }, function (err) {
             console.log("-- Error | " + err);
         });
 
 
-        if(__Reject_FingerPrint === true)
-        {
+        if (__Reject_FingerPrint === true) {
             console.log("-- Reject | FingerPrint");
         }
-        else if(__Stayon === true)
-        {
+        else if (__Stayon === true) {
             let __Fail_Element_Exist;
             await Promise.race([
                 page.waitForSelector(__Element_Status_Fail, { timeout: 60000 })
-            ]).then(function(result) {
-                if(result == 'JSHandle@node')
-                {
+            ]).then(function (result) {
+                if (result == 'JSHandle@node') {
                     __Fail_Element_Exist = true;
                     //console.log("-- Exist | " + result);
                 }
-                else if(result == '[object Object]')
-                {
+                else if (result == '[object Object]') {
                     __Fail_Element_Exist = false;
                     //console.log("-- Doesn't Exist | " + result);
                 }
-            }, function(err) {
+            }, function (err) {
                 console.log("-- Error | " + err);
             });
 
-            if(__Fail_Element_Exist)
-            {
+            if (__Fail_Element_Exist) {
                 if (await page.$(__Element_Status_Fail)) {
                     let __rs = await page.$eval(__Element_Status_Fail, el => el.textContent.trim());
-                    if(__rs === 'The email or password you entered is not valid. Please try again.')
-                    {
+                    if (__rs === 'The email or password you entered is not valid. Please try again.') {
                         console.log("-- False | " + __rs);
                     }
-                    else
-                    {
+                    else {
                         console.log("-- Reject | FingerPrint | ?_V2_" + __rs);
                     }
                 }
-                else
-                {
+                else {
                     console.log("-- HTTP_Proxy | #_Fail_Status_Doesn_t_Exist_?_Why | " + __rs);
                 }
             }
-            else
-            {
+            else {
                 console.log("-- HTTP_Proxy | #_Fail_Status_Doesn_t_Exist | " + __rs);
             }
         }
-        else
-        {
+        else {
             console.log("-- ? | #Could Be Success ?_" + page.html());
         }
-        await page.waitFor(20000*1000);
+        await page.waitFor(20000 * 1000);
 
         return;
     }
-    catch(ex)
-    {
+    catch (ex) {
         console.log('-- SSH |' + ex);
     }
 };

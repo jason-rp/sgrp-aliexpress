@@ -60,8 +60,8 @@ __Http.get('http://127.0.0.1:8044/').then((res) => {
     console.error(error)
 });
 
-let __Width = 1600;
-let __Height = 900;
+let __Width = 1800;
+let __Height = 1200;
 
 const registerNewAccount = async () => {
     let __UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36';
@@ -101,7 +101,35 @@ const registerNewAccount = async () => {
         await __Signin.click();
     }
     await __Set_TOut(3000);
+    var __Prepairing_Ajax = false;
 
+    let __Data_Shipping_jSon = "";
+    let __Data_AJAX = "";
+
+    var __Done_Url = false;
+    var __Done_Url_AJAX = false;
+    await page.on('response', async (response) => {
+        if (response.url().indexOf("/aeglodetailweb/api/logistics/freight") != -1) {
+            __Data_Shipping_jSon = await response.text() || "Deo Co Dau Ma Tim";
+            __Done_Url = true;
+        }
+        else if (response.url().startsWith('https://feedback.aliexpress.com') && response.url().indexOf('/display/evaluationDsrAjaxService.htm?callback=') !== 1) {
+            if (__Prepairing_Ajax) {
+                var __Temp = await response.text() || "Deo Co Dau Ma Tim";
+                if (JSON.stringify(__Temp).indexOf('jQuery') !== -1) {
+                    __Data_AJAX = __Temp;
+                }
+                else {
+                    __Data_AJAX = "Cai Quan Que Gi The Nay: " + response.url();
+                }
+                __Done_Url_AJAX = true;
+                __Prepairing_Ajax = false;
+            }
+        }
+        else {
+
+        }
+    });
     //get all item in each category
     var rpss = [];
     for (var j = 1; j <= 1; j++) {
@@ -111,7 +139,25 @@ const registerNewAccount = async () => {
             pathCategories: "",
             productId: -1,
             productName: "",
-            productSkuProps: ""
+            productSkuProps: "",
+            description: "",
+            buyingPrice: "",
+            itemLot: "",
+            brandName: "",
+            stockNumber: "",
+            storeId: 0,
+            storeName: "",
+            storeYear: "",
+            storeRating: "",
+            storeRatingTotal: 0,
+            orderNumber: 0,
+            ratingNumber: 0,
+            ratingPercentNumber: 0,
+            shippingContent: "",
+            onTimeDelivery: "",
+            imagePathList: "",
+            specificationHtml: "",
+            storeRatingMultiple: ""
         };
 
         var urlItem = 'https://www.aliexpress.com/category/' + _loginUrlId + '/patches.html?trafficChannel=main&catName=patches&CatId='
@@ -119,12 +165,27 @@ const registerNewAccount = async () => {
             + j + '&isrefine=y';
         await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
 
-        try {
-            //get categoryName
-            var redifineCategory = await page.evaluate(() => {
-                return window.runParams.refineCategory;
-            });
 
+        //get categoryName
+        var redifineCategory = await page.evaluate(() => {
+            return window.runParams === undefined ? undefined : window.runParams.refineCategory;
+        });
+        if (redifineCategory === undefined) {
+            console.log("loi slide");
+            await page.waitForSelector('.nc_iconfont.btn_slide');
+            let sliderElement = await page.$('.slidetounlock');
+            let slider = await sliderElement.boundingBox();
+
+            let slideHandle = await page.$('.nc_iconfont.btn_slide');
+            let handle = await slideHandle.boundingBox();
+
+            await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+            await page.mouse.down();
+            await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
+            await page.mouse.up();
+            await __Set_TOut(3000);
+        }
+        else {
             if (redifineCategory.length > 0) {
                 crawlItem.categoryName = redifineCategory[0].categoryName;
                 var pthCategory = "";
@@ -140,11 +201,7 @@ const registerNewAccount = async () => {
                 }
             }
         }
-        catch (ex) {
-            console.log("Error: " + ex);
-            await __Set_TOut(80000);
-            break;
-        }
+
 
         var runParams = await page.evaluate(() => {
             return window.runParams.items;
@@ -210,12 +267,135 @@ const registerNewAccount = async () => {
                     crawlItem.productName = windowrunParams.data.titleModule.subject;
 
                     //get description
-                    //const data = await page.evaluate(() => document.querySelector('.detailmodule_html').outerHTML);
-                    const data = await page.$$eval('.detailmodule_html', items => items.map(item => item.innerText));
+                    await page.evaluate(() => window.scrollTo(0, 1000));
+                    await page.waitForSelector('.product-overview');
+                    await page.$('.product-overview');
+                    let text = await page.evaluate(() => document.getElementsByClassName('product-overview')[0].innerHTML);
+                    let textJson = JSON.stringify(text);
 
-                    console.log(data[0]);
-                    break;
+                    let textReplace = textJson.replace('<p>', '::p::');
+                    textReplace = textReplace.replace('</p>', '::_p::');
+                    textReplace = textReplace.replace('<strong>', '::strong::');
+                    textReplace = textReplace.replace('</strong>', '::_strong::');
 
+                    var newString = textReplace.replace(/<.*?>/ig, "");
+
+                    let description = newString.replace('::p::', '<p>');
+                    description = description.replace('::_p::', '</p>');
+                    description = description.replace('::strong::', '<strong>');
+                    description = description.replace('::_strong::', '</strong>');
+
+                    crawlItem.description = description;
+
+                    crawlItem.buyingPrice = windowrunParams.data.priceModule.formatedActivityPrice;
+                    crawlItem.itemLot = windowrunParams.data.priceModule.lot == true ? windowrunParams.data.priceModule.numberPerLot
+                        + " " + windowrunParams.data.priceModule.oddUnitName : "";
+                    if (windowrunParams.data.specsModule.props.length > 1) {
+                        for (var prop in windowrunParams.data.specsModule.props) {
+                            if (windowrunParams.data.specsModule.props[prop].attrNameId == 2) {
+                                crawlItem.brandName = windowrunParams.data.specsModule.props[prop].attrValue;
+                            }
+                        }
+                    }
+                    crawlItem.stockNumber = windowrunParams.data.quantityModule.totalAvailQuantity;
+                    crawlItem.storeId = windowrunParams.data.storeModule.storeNum;
+                    crawlItem.storeName = windowrunParams.data.storeModule.storeName;
+                    crawlItem.storeYear = windowrunParams.data.storeModule.openTime;
+                    crawlItem.storeRating = windowrunParams.data.storeModule.positiveRate;
+                    crawlItem.storeRatingTotal = windowrunParams.data.storeModule.positiveNum;
+                    crawlItem.orderNumber = windowrunParams.data.titleModule.tradeCount;
+                    crawlItem.ratingNumber = windowrunParams.data.titleModule.feedbackRating.totalValidNum;
+                    crawlItem.ratingPercentNumber = windowrunParams.data.titleModule.feedbackRating.averageStar;
+
+                    var imgPathes = "";
+                    if (windowrunParams.data.imageModule.imagePathList.length > 0) {
+                        for (var img in windowrunParams.data.imageModule.imagePathList) {
+                            imgPathes += imgPathes === "" ? windowrunParams.data.imageModule.imagePathList[img] : "|" + windowrunParams.data.imageModule.imagePathList[img];
+                        }
+                    }
+                    crawlItem.imagePathList = imgPathes;
+
+                    var specHtml = "";
+                    if (windowrunParams.data.specsModule.props.length > 0) {
+                        for (var elementPath in windowrunParams.data.specsModule.props) {
+                            if (elementPath < 11) {
+                                specHtml += "<p>" + windowrunParams.data.specsModule.props[elementPath].attrName + " : "
+                                    + windowrunParams.data.specsModule.props[elementPath].attrValue + "</p>";
+                            }
+                        }
+                    }
+
+                    crawlItem.specificationHtml = specHtml;
+
+                    await page.evaluate(() => window.scrollTo(0, 0));
+
+                    await page.evaluate(x => {
+                        const __Scrollable_Section = document.querySelector(x);
+
+                        __Scrollable_Section.scrollTop = __Scrollable_Section.offsetHeight;
+                    }, '.product-title');
+                    __Data_AJAX = "";
+                    __Prepairing_Ajax = false;
+                    __Done_Url_AJAX = false;
+                    await page.waitForSelector('#store-info-wrap > div.store-container > .store-name', { timeout: 5000, visible: true })
+                        .then(async () => {
+
+                            try {
+                                const __Ajax_X = await page.evaluate(() => {
+                                    const docALL = document.querySelector('#store-info-wrap > div.store-container');
+                                    return docALL.getBoundingClientRect().x;
+                                });
+                                const __Ajax_Y = await page.evaluate(() => {
+                                    const docALL = document.querySelector('#store-info-wrap > div.store-container');
+                                    return docALL.getBoundingClientRect().y;
+                                });
+                                const __Ajax_W = await page.evaluate(() => {
+                                    const docALL = document.querySelector('#store-info-wrap > div.store-container');
+                                    return docALL.getBoundingClientRect().width;
+                                });
+                                const __Ajax_H = await page.evaluate(() => {
+                                    const docALL = document.querySelector('#store-info-wrap > div.store-container');
+                                    return docALL.getBoundingClientRect().height;
+                                });
+                                __Data_AJAX = "";
+                                __Done_Url_AJAX = false;
+                                __Prepairing_Ajax = true;
+                                await page.mouse.move(__Ajax_X + __Ajax_W / 2, __Ajax_Y + __Ajax_H / 2);
+                                await page.waitForResponse(response => response.url().indexOf("/display/evaluationDsrAjaxService.htm?callback=") !== -1 && response.status() === 200);
+                            }
+                            catch (ex) { console.log("Move: " + ex); }
+
+                            await __Set_TOut(500);
+
+                            while (!__Done_Url_AJAX) {
+                                await __Set_TOut(100);
+                            }
+
+                            crawlItem.storeRatingMultiple = __Data_AJAX;
+                        }).catch(async (err) => {
+
+                        });
+
+                    __Data_Shipping_jSon = "";
+                    __Done_Url = false;
+
+                    await page.waitForSelector('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link', { timeout: 2000 })
+                        .then(async () => {
+                            try {
+                                await page.click('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link');
+                            }
+                            catch (ex) { console.log("Click: " + ex); }
+
+                            await __Set_TOut(500);
+
+                            while (!__Done_Url) {
+                                await __Set_TOut(100);
+                            }
+
+                            crawlItem.shippingContent = __Data_Shipping_jSon;
+                        }).catch(async () => {
+
+                        });
 
                     //end crawl
                     rpss.push(crawlItem);
@@ -225,7 +405,6 @@ const registerNewAccount = async () => {
             catch (ex) {
                 console.log("Error: " + ex);
                 console.log(item.productDetailUrl);
-                await __Set_TOut(80000);
                 break;
             }
         }

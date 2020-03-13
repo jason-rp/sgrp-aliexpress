@@ -36,7 +36,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
                 if (executeNodeResult.Count == 1)
                 {
-                    var rawData = JsonConvert.DeserializeObject<List<ProductDetailModel>>(executeNodeResult[0]);
+                    var rawData = JsonConvert.DeserializeObject<List<CategoryViewModel>>(executeNodeResult[0]);
                 }
             }
 
@@ -109,7 +109,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
         public static List<string> Node(string fileName, string command, ref int pId, string dir = "Node",
             int timeout = 0)
         {
-            var isDebug = true;
+            var isDebug = false;
 
             var result = new List<string>();
             try
@@ -189,7 +189,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                 result += GetRandomCharacter(text, rng);
             }
             result += rng.Next(0, 9) + rng.Next(1, 9) + GetRandomCharacter(text, rng);
-            result += "@gmail.com|" + "saint120475104" + GetRandomCharacter(text, rng) + GetRandomCharacter(text, rng);
+            result += "@gmail.com|" + "sgg120475104" + GetRandomCharacter(text, rng) + GetRandomCharacter(text, rng);
 
             return result;
         }

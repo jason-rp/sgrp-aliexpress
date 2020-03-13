@@ -21,7 +21,6 @@ namespace SGRP.Aliexpress.Data
             builder.Entity<User>().ToTable("Users");
         }
 
-
     }
 
     public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>

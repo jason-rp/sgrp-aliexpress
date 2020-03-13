@@ -25,7 +25,7 @@ namespace SGRP.Aliexpress.CrawlService
             {
                 new InputUrlModel
                 {
-                    Url = $"https://www.aliexpress.com/category/100003415/patches.html?trafficChannel=main&catName=patches&CatId=100003415&ltype=wholesale&SortType=default&page=1&isrefine=y"
+                    Url = $"https://www.aliexpress.com/category/200002253/patches.html?trafficChannel=main&catName=patches&CatId=200002253&ltype=wholesale&SortType=default&page=1&isrefine=y"
                 }
                 
             }).ToList();

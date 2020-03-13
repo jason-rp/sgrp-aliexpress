@@ -144,7 +144,7 @@ const registerNewAccount = async () => {
             buyingPrice: "",
             itemLot: "",
             brandName: "",
-            stockNumber: "",
+            stockNumber: 0,
             storeId: 0,
             storeName: "",
             storeYear: "",
@@ -152,7 +152,7 @@ const registerNewAccount = async () => {
             storeRatingTotal: 0,
             orderNumber: 0,
             ratingNumber: 0,
-            ratingPercentNumber: 0,
+            ratingPercentNumber: "",
             shippingContent: "",
             onTimeDelivery: "",
             imagePathList: "",
@@ -399,6 +399,7 @@ const registerNewAccount = async () => {
 
                     //end crawl
                     rpss.push(crawlItem);
+                    break;
                 }
 
             }

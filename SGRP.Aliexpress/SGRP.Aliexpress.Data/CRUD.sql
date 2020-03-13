@@ -86,16 +86,26 @@ IF NOT EXISTS
     CREATE TABLE [dbo].[Product]
     (
         Id BIGINT IDENTITY(1, 1) NOT NULL,
-        ParentId BIGINT NULL,
+        IsParent BIT NOT NULL DEFAULT 0,
+		ProductId BIGINT NOT NULL,
 		ProductKeyId VARCHAR(MAX) NOT NULL,
 		ProductName NVARCHAR(MAX) NOT NULL,
 		[Description] NVARCHAR(MAX) NULL,
 		BuyingPrice NVARCHAR(MAX) NULL,
 		ItemLot NVARCHAR(MAX) NULL,
 		BrandName NVARCHAR(MAX) NULL,
-		StockNumber VARCHAR(MAX) NULL,
+		StockNumber BIGINT NULL,
 		CategoryId BIGINT NULL,
+		CategoryName NVARCHAR(MAX) NULL,
 		StoreId BIGINT NULL,
+		StoreName NVARCHAR(MAX) NULL,
+		StoreYear NVARCHAR(MAX) NULL,
+		StoreRatingPercent VARCHAR(20) NULL,
+		StoreRatingDescribed DECIMAL NULL,
+		StoreRatingCommunication DECIMAL NULL,
+		StoreRatingShippingSpeed DECIMAL NULL,
+		StoreRatingTotal INT NULL,
+
 		OrderNumber BIGINT NOT NULL,
 		RatingNumber BIGINT NULL,
 		RatingPercent DECIMAL NULL,
@@ -104,8 +114,8 @@ IF NOT EXISTS
 		ParentChild VARCHAR(50) NULL,
 		ParentSku BIGINT NULL,
 		RelationShipType VARCHAR(50) NULL,
-		Specification10 NVARCHAR(MAX)
-		--ActionTime DATETIME NULL DEFAULT GETDATE()
+		Specification10 NVARCHAR(MAX) NULL,
+		ActionTime DATETIME NULL DEFAULT GETDATE()
 
             CONSTRAINT [PK_Product]
             PRIMARY KEY CLUSTERED ([Id] ASC)

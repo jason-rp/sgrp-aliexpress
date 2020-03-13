@@ -1,8 +1,7 @@
-﻿using System.IO;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using SGRP.Aliexpress.Bussiness.Models;
+using SGRP.Aliexpress.Data.Entities;
 
 namespace SGRP.Aliexpress.Data
 {
@@ -12,16 +11,13 @@ namespace SGRP.Aliexpress.Data
 
 
 
-        public  DbSet<User> Users { get; set; }
-
-        public DbSet<Product> Products { get; set; }
+        public DbSet<Product> Product { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<User>().ToTable("Users");
-            builder.Entity<Product>().ToTable("Products");
+            builder.Entity<Product>().ToTable("Product");
         }
 
     }

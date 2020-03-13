@@ -36,7 +36,7 @@ namespace SGRP.Aliexpress.Bussiness.ViewModel
         public string BrandName { get; set; }
 
         [JsonProperty(PropertyName = "stockNumber")]
-        public string StockNumber { get; set; }
+        public long StockNumber { get; set; }
 
         [JsonProperty(PropertyName = "storeId")]
         public long StoreId { get; set; }
@@ -60,7 +60,7 @@ namespace SGRP.Aliexpress.Bussiness.ViewModel
         public long OrderNumber { get; set; }
 
         [JsonProperty(PropertyName = "ratingNumber")]
-        public int RatingNumber { get; set; }
+        public long RatingNumber { get; set; }
 
         [JsonProperty(PropertyName = "ratingPercentNumber")]
         public string RatingPercentNumber { get; set; }

@@ -63,7 +63,7 @@ namespace SGRP.Aliexpress.Bussiness.ViewModel
         public int RatingNumber { get; set; }
 
         [JsonProperty(PropertyName = "ratingPercentNumber")]
-        public int RatingPercentNumber { get; set; }
+        public string RatingPercentNumber { get; set; }
 
         [JsonProperty(PropertyName = "shippingContent")]
         public string ShippingContent { get; set; }

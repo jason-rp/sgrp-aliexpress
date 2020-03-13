@@ -37,6 +37,8 @@ namespace SGRP.Aliexpress.CrawlService.Services
                 if (executeNodeResult.Count == 1)
                 {
                     var rawData = JsonConvert.DeserializeObject<List<CategoryViewModel>>(executeNodeResult[0]);
+                    new DataResolverService(rawData).ResolveData();
+                    
                 }
             }
 

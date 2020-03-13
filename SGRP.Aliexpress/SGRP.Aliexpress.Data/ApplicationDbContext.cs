@@ -14,11 +14,14 @@ namespace SGRP.Aliexpress.Data
 
         public  DbSet<User> Users { get; set; }
 
+        public DbSet<Product> Products { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<User>().ToTable("Users");
+            builder.Entity<Product>().ToTable("Products");
         }
 
     }

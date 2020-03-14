@@ -24,11 +24,6 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
             foreach (var url in urls)
             {
-                var viewModel = new CategoryViewModel
-                {
-                    CategoryId = url.Id,
-                    CategoryName = "test"
-                };
 
                 var executeNodeResult = Node("nodescript.js",
                     "\"" + -101 + "\"" + " \"" + GetLoginUrlFromCategory(url) + "\"" + " \"" + url.Id + "\"" + " \"" +
@@ -37,7 +32,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                 if (executeNodeResult.Count == 1)
                 {
                     var rawData = JsonConvert.DeserializeObject<List<CategoryViewModel>>(executeNodeResult[0]);
-                    new DataResolverService(rawData).ResolveData();
+                    new DataResolverService(rawData).ResolveData(url.Id);
                     
                 }
             }

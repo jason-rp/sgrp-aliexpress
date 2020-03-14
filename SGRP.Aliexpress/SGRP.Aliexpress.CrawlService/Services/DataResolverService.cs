@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using SGRP.Aliexpress.Bussiness.Models;
 using SGRP.Aliexpress.Bussiness.ViewModel;
@@ -18,10 +19,11 @@ namespace SGRP.Aliexpress.CrawlService.Services
             _viewModel = rawData;
         }
 
-        public void ResolveData()
+        public void ResolveData(long catId)
         {
             using (var context = new DesignTimeDbContextFactory().CreateDbContext())
             {
+                var products = new List<Product>();
                 foreach (var viewModel in _viewModel)
                 {
                     var ratingDesc = 0M;
@@ -36,7 +38,8 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
                     if (!string.IsNullOrEmpty(viewModel.StoreRatingMultiple))
                     {
-                        var ratingDetail = JsonConvert.DeserializeObject<StoreRatingDetailModel>(viewModel.StoreRatingMultiple);
+                        var storeRatingMultiple = new Regex("location.href=\"(.*)\".*?$").Match(viewModel.StoreRatingMultiple).Groups[1].Value.Trim();
+                        var ratingDetail = JsonConvert.DeserializeObject<StoreRatingDetailModel>(storeRatingMultiple);
                         if (ratingDetail != null)
                         {
                             ratingDesc = ratingDetail.StoreRatingDesc.Score;
@@ -99,7 +102,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                         ItemLot = viewModel.ItemLot,
                         BrandName = viewModel.BrandName,
                         StockNumber = viewModel.StockNumber,
-                        CategoryId = viewModel.CategoryId,
+                        CategoryId = catId,
                         CategoryName = viewModel.CategoryName,
                         StoreId = viewModel.StoreId,
                         StoreName = viewModel.StoreName,
@@ -170,6 +173,8 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
                     if (!string.IsNullOrEmpty(viewModel.SkuPriceList))
                     {
+                        products.Add(product);
+
                         var productChild = product;
                         productChild.IsParent = null;
                         var prices = JsonConvert.DeserializeObject<List<SkuPriceList>>(viewModel.SkuPriceList);
@@ -186,6 +191,12 @@ namespace SGRP.Aliexpress.CrawlService.Services
                                     var ids = price.skuPropIds.Split(",");
                                     var childName = " - (";
                                     var bullet1 = "NOTE - You are Choosing: \"";
+                                    var variationTheme = "";
+                                    var variationColor = "";
+                                    var variationSize = "";
+                                    var variationPlus1 = "";
+                                    var variationPlus2 = "";
+                                    var shippingFrom = "";
 
                                     foreach (var id in ids)
                                     {
@@ -219,9 +230,44 @@ namespace SGRP.Aliexpress.CrawlService.Services
                                                     .First(n => n.propertyValueId.ToString() == id)
                                                     .propertyValueDisplayName;
                                             }
+
+                                            if (currentProp.Any(n => n.SkuPropertyName.Contains("Color")))
+                                            {
+                                                variationTheme += "Color";
+                                                variationColor = currentProp.First().SkuPropertyValues
+                                                    .First(n => n.propertyValueId.ToString() == id)
+                                                    .propertyValueDisplayName;
+                                            }
+                                            else if (currentProp.Any(n => n.SkuPropertyName.Contains("Size")))
+                                            {
+                                                variationTheme += " SizeName";
+                                                variationSize = currentProp.First().SkuPropertyValues
+                                                    .First(n => n.propertyValueId.ToString() == id)
+                                                    .propertyValueDisplayName;
+                                            }
+                                            else if(!string.IsNullOrEmpty(variationColor) && !string.IsNullOrEmpty(variationSize))
+                                            {
+                                                variationPlus1 = currentProp.First().SkuPropertyValues
+                                                    .First(n => n.propertyValueId.ToString() == id)
+                                                    .propertyValueDisplayName;
+                                            }
+                                            else if(!string.IsNullOrEmpty(variationColor) && !string.IsNullOrEmpty(variationSize) && !string.IsNullOrEmpty(variationPlus1))
+                                            {
+                                                variationPlus2 = currentProp.First().SkuPropertyValues
+                                                    .First(n => n.propertyValueId.ToString() == id)
+                                                    .propertyValueDisplayName;
+                                            }
+                                            else if(currentProp.Any(n => n.SkuPropertyName.Contains("Ships From")))
+                                            {
+                                                shippingFrom += currentProp.First().SkuPropertyValues
+                                                    .First(n => n.propertyValueId.ToString() == id)
+                                                    .propertyValueDisplayName + " , ";
+                                            }
                                         }
 
                                     }
+
+
 
                                     bullet1 += " \", Price for this selection only not for all.";
                                     childName += " )";
@@ -242,6 +288,24 @@ namespace SGRP.Aliexpress.CrawlService.Services
                                     productChild.Bullet1ST = bullet1;
                                     productChild.ParentSku = productChild.ProductId;
                                     productChild.RelationshipType = "Variation";
+                                    productChild.VariationTheme = variationTheme;
+
+                                    productChild.VariationColor = variationColor;
+                                    productChild.VariationSize = variationSize;
+                                    productChild.VariationPlus1ST = variationPlus1;
+                                    productChild.VariationPlus2ND = variationPlus2;
+
+                                    //add to db
+
+                                     childName = " - (";
+                                     bullet1 = "NOTE - You are Choosing: \"";
+                                     variationTheme = "";
+                                     variationColor = "";
+                                     variationSize = "";
+                                     variationPlus1 = "";
+                                     variationPlus2 = "";
+                                     shippingFrom = "";
+                                    products.Add(productChild);
                                 }
 
                             }
@@ -251,8 +315,6 @@ namespace SGRP.Aliexpress.CrawlService.Services
                             //single product
                             foreach (var price in prices)
                             {
-
-
                                 var shipping1StValue = !string.IsNullOrEmpty(productChild.Shipping1ST)
                                     ? Convert.ToDecimal((productChild.Shipping1ST.Split("|"))[1])
                                     : 0;
@@ -266,17 +328,24 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
                                 productChild.BuyingPrice = Convert.ToDecimal(price.skuVal.actSkuCalPrice);
 
+                                products.Add(productChild);
+
                             }
 
-
                         }
+
 
                     }
 
 
                 }
 
-                context.SaveChanges();
+                //foreach (var product in products)
+                //{
+                    
+                //}
+                context.AddRange(products);
+                //context.SaveChanges();
             }
         }
 

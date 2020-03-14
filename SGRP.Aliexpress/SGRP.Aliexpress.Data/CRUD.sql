@@ -80,13 +80,17 @@ IF NOT EXISTS
 (
     SELECT *
     FROM sys.objects
-    WHERE object_id = OBJECT_ID(N'[dbo].[ProductDetail]')
+    WHERE object_id = OBJECT_ID(N'[dbo].[Product]')
           AND type IN ( N'U' )
 )
     CREATE TABLE [dbo].[Product]
     (
         Id BIGINT IDENTITY(1, 1) NOT NULL,
         IsParent BIT  NULL DEFAULT 0,
+		CategoryId BIGINT NULL,
+		CategoryName NVARCHAR(MAX) NULL,
+		StoreId BIGINT NULL,
+		StoreName NVARCHAR(MAX) NULL,
 		ProductId BIGINT NOT NULL,
 		ProductKeyId VARCHAR(MAX) NOT NULL,
 		ProductName NVARCHAR(MAX) NOT NULL,
@@ -95,10 +99,7 @@ IF NOT EXISTS
 		ItemLot NVARCHAR(MAX) NULL,
 		BrandName NVARCHAR(MAX) NULL,
 		StockNumber BIGINT NULL,
-		CategoryId BIGINT NULL,
-		CategoryName NVARCHAR(MAX) NULL,
-		StoreId BIGINT NULL,
-		StoreName NVARCHAR(MAX) NULL,
+
 		StoreYear NVARCHAR(MAX) NULL,
 		StoreRatingPercent VARCHAR(20) NULL,
 		StoreRatingDescribed DECIMAL NULL,

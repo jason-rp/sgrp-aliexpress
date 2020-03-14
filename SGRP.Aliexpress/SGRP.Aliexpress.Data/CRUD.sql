@@ -86,12 +86,12 @@ IF NOT EXISTS
     CREATE TABLE [dbo].[Product]
     (
         Id BIGINT IDENTITY(1, 1) NOT NULL,
-        IsParent BIT NOT NULL DEFAULT 0,
+        IsParent BIT  NULL DEFAULT 0,
 		ProductId BIGINT NOT NULL,
 		ProductKeyId VARCHAR(MAX) NOT NULL,
 		ProductName NVARCHAR(MAX) NOT NULL,
 		[Description] NVARCHAR(MAX) NULL,
-		BuyingPrice NVARCHAR(MAX) NULL,
+		BuyingPrice DECIMAL NULL,
 		ItemLot NVARCHAR(MAX) NULL,
 		BrandName NVARCHAR(MAX) NULL,
 		StockNumber BIGINT NULL,
@@ -105,17 +105,43 @@ IF NOT EXISTS
 		StoreRatingCommunication DECIMAL NULL,
 		StoreRatingShippingSpeed DECIMAL NULL,
 		StoreRatingTotal INT NULL,
-
 		OrderNumber BIGINT NOT NULL,
 		RatingNumber BIGINT NULL,
 		RatingPercent DECIMAL NULL,
 		ProcessingTime NVARCHAR(MAX) NULL,
+		ShippingCompany NVARCHAR(MAX) NULL,
+		ShippingFee DECIMAL NULL,
+		Shipping1ST NVARCHAR(MAX) NULL,
+		Shipping2ND NVARCHAR(MAX) NULL,
+		Shipping3RD NVARCHAR(MAX) NULL,
+		OnTimeDelivery VARCHAR(50) NULL,
 		TotalPrice DECIMAL NOT NULL,
+		Bullet1ST NVARCHAR(MAX) NULL,
+		Bullet2ND NVARCHAR(MAX) NULL,
+		Bullet3RD NVARCHAR(MAX) NULL,
+		Bullet4TH NVARCHAR(MAX) NULL,
+		Bullet5TH NVARCHAR(MAX) NULL,
+
+		Image1ST NVARCHAR(MAX) NULL,
+		Image2ND NVARCHAR(MAX) NULL,
+		Image3RD NVARCHAR(MAX) NULL,
+		Image4TH NVARCHAR(MAX) NULL,
+		Image5TH NVARCHAR(MAX) NULL,
+		Image6TH NVARCHAR(MAX) NULL,
+		Image7TH NVARCHAR(MAX) NULL,
+
+		VariationTheme VARCHAR(MAX) NOT NULL,
+		VariationColor  VARCHAR(MAX) NOT NULL,
+		VariationSize VARCHAR(MAX) NOT NULL,
+		VariationPlus1ST VARCHAR(MAX) NOT NULL,
+		VariationPlus2ND VARCHAR(MAX) NOT NULL,
+		VariationShippingFrom VARCHAR(MAX) NULL,
+
 		ParentChild VARCHAR(50) NULL,
 		ParentSku BIGINT NULL,
 		RelationShipType VARCHAR(50) NULL,
 		Specification10 NVARCHAR(MAX) NULL,
-		ActionTime DATETIME NULL DEFAULT GETDATE()
+		ActionTime DATETIME NOT NULL DEFAULT GETDATE()
 
             CONSTRAINT [PK_Product]
             PRIMARY KEY CLUSTERED ([Id] ASC)

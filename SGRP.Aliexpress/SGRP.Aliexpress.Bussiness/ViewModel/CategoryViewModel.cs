@@ -20,8 +20,8 @@ namespace SGRP.Aliexpress.Bussiness.ViewModel
         [JsonProperty(PropertyName = "productName")]
         public string ProductName { get; set; }
 
-        [JsonProperty(PropertyName = "productSkuProps")]
-        public string ProductSkuProps { get; set; }
+        //[JsonProperty(PropertyName = "productSkuProps")]
+        //public string ProductSkuProps { get; set; }
 
         [JsonProperty(PropertyName = "description")]
         public string Description { get; set; }
@@ -77,5 +77,23 @@ namespace SGRP.Aliexpress.Bussiness.ViewModel
 
         [JsonProperty(PropertyName = "specificationHtml")]
         public string SpecificationHtml { get; set; }
+
+        [JsonProperty(PropertyName = "productSKUPropertyList")]
+        public string ProductSKUPropertyList { get; set; }
+
+        [JsonProperty(PropertyName = "skuPriceList")]
+        public string SkuPriceList { get; set; }
+
+        [JsonProperty(PropertyName = "specification1")]
+        public string Specification1 { get; set; }
+
+        [JsonProperty(PropertyName = "specification2")]
+        public string Specification2 { get; set; }
+
+        [JsonProperty(PropertyName = "specification3")]
+        public string Specification3 { get; set; }
+
+        [JsonProperty(PropertyName = "specification4")]
+        public string Specification4 { get; set; }
     }
 }

@@ -25,6 +25,9 @@ namespace SGRP.Aliexpress.Bussiness.Models
         [JsonProperty(PropertyName = "company")]
         public string Company { get; set; }
 
+        [JsonProperty(PropertyName = "time")]
+        public string Time { get; set; }
+
         [JsonProperty(PropertyName = "freightAmount")]
         public ShippingFreightAmount ShippingFreightAmount { get; set; }
     }

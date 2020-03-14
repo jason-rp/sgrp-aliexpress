@@ -22,7 +22,6 @@ namespace SGRP.Aliexpress.CrawlService.Services
         {
             using (var context = new DesignTimeDbContextFactory().CreateDbContext())
             {
-                //var releases = context.Users.Take(5);
                 foreach (var viewModel in _viewModel)
                 {
                     var ratingDesc = 0M;
@@ -30,9 +29,10 @@ namespace SGRP.Aliexpress.CrawlService.Services
                     var ratingShip = 0M;
                     var shippingCompany = "";
                     var shippingFee = 0M;
-                    var shippping1 = "";
+                    var shipping1 = "";
                     var shipping2 = "";
                     var shipping3 = "";
+                    var onTimeDelivery = "";
 
                     if (!string.IsNullOrEmpty(viewModel.StoreRatingMultiple))
                     {
@@ -56,6 +56,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                             {
                                 shippingCompany = ePack.First().Company;
                                 shippingFee = ePack.First().ShippingFreightAmount.Value;
+                                onTimeDelivery = ePack.First().Time;
                             }
 
                             var sorts = shippingData.ShippingBody.ShippingFreightResult
@@ -71,7 +72,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                                     switch (count)
                                     {
                                         case 1:
-                                            shippping1 = shippingStr;
+                                            shipping1 = shippingStr;
                                             break;
                                         case 2:
                                             shipping2 = shippingStr;
@@ -107,24 +108,172 @@ namespace SGRP.Aliexpress.CrawlService.Services
                         StoreRatingDescribed = ratingDesc,
                         StoreRatingCommunication = ratingComm,
                         StoreRatingShippingSpeed = ratingShip,
-                        OrderNumber = viewModel.OrderNumber,
                         RatingNumber = viewModel.RatingNumber,
                         RatingPercent = Convert.ToDecimal(viewModel.RatingPercentNumber),
+                        StoreRatingTotal = viewModel.StoreRatingTotal,
+                        OrderNumber = viewModel.OrderNumber,
                         ProcessingTime = string.Empty,
-                        
-                        
+                        ShippingCompany = shippingCompany,
+                        ShippingFee = shippingFee,
+                        Shipping1ST = shipping1,
+                        Shipping2ND = shipping2,
+                        Shipping3RD = shipping3,
+                        OnTimeDelivery = onTimeDelivery,
+                        Specification10 = viewModel.SpecificationHtml,
+                        Bullet2ND = viewModel.Specification1,
+                        Bullet3RD = viewModel.Specification2,
+                        Bullet4TH = viewModel.Specification3,
+                        Bullet5TH = viewModel.Specification4,
+                        ParentChild = "Parent"
+
                     };
-                    if (!string.IsNullOrEmpty(viewModel.ProductSkuProps))
+
+                    if (!string.IsNullOrEmpty(viewModel.ImagePatchList))
                     {
-                        var productSkuItems = viewModel.ProductSkuProps.Split("::");
-                        foreach (var productSkuItem in productSkuItems)
+                        var imgs = viewModel.ImagePatchList.Split("|").ToList();
+
+                        if (imgs.Any())
                         {
-                            var skuItems = productSkuItem.Split(":");
-                            
+                            for (var i = 0; i < imgs.Count; i++)
+                            {
+                                if (i == 0)
+                                {
+                                    product.Image1ST = imgs[i];
+                                }
+                                else if (i == 1)
+                                {
+                                    product.Image2ND = imgs[i];
+                                }
+                                else if (i == 2)
+                                {
+                                    product.Image3RD = imgs[i];
+                                }
+                                else if (i == 3)
+                                {
+                                    product.Image4TH = imgs[i];
+                                }
+                                else if (i == 4)
+                                {
+                                    product.Image5TH = imgs[i];
+                                }
+                                else if (i == 5)
+                                {
+                                    product.Image6TH = imgs[i];
+                                }
+                                else if (i == 6)
+                                {
+                                    product.Image7TH = imgs[i];
+                                }
+                            }
                         }
                     }
 
-                    
+                    if (!string.IsNullOrEmpty(viewModel.SkuPriceList))
+                    {
+                        var productChild = product;
+                        productChild.IsParent = null;
+                        var prices = JsonConvert.DeserializeObject<List<SkuPriceList>>(viewModel.SkuPriceList);
+                        if (!string.IsNullOrEmpty(viewModel.ProductSKUPropertyList))
+                        {
+                            productChild.ParentChild = "Child";
+
+                            var skuProps =
+                                JsonConvert.DeserializeObject<List<SkuPropertyListModel>>(viewModel.ProductSKUPropertyList);
+                            if (skuProps.Any() && prices.Any())
+                            {
+                                foreach (var price in prices)
+                                {
+                                    var ids = price.skuPropIds.Split(",");
+                                    var childName = " - (";
+                                    var bullet1 = "NOTE - You are Choosing: \"";
+
+                                    foreach (var id in ids)
+                                    {
+                                        var currentProp = skuProps.Where(n =>
+                                                n.SkuPropertyValues.Select(i => i.propertyValueId.ToString()).Contains(id))
+                                            .ToList();
+
+                                        if (currentProp.Any())
+                                        {
+                                            if (childName == " - ( ")
+                                            {
+                                                childName += currentProp.First().SkuPropertyName + ": " +
+                                                             currentProp.First().SkuPropertyValues.First(n => n.propertyValueId.ToString() == id)
+                                                                 .propertyValueDisplayName;
+                                            }
+                                            else
+                                            {
+                                                childName += ", " + currentProp.First().SkuPropertyValues.First(n => n.propertyValueId.ToString() == id)
+                                                    .propertyValueDisplayName;
+                                            }
+
+                                            if (bullet1 == "NOTE - You are Choosing: \"")
+                                            {
+                                                bullet1 += currentProp.First().SkuPropertyValues
+                                                    .First(n => n.propertyValueId.ToString() == id)
+                                                    .propertyValueDisplayName;
+                                            }
+                                            else
+                                            {
+                                                bullet1 += ", " + currentProp.First().SkuPropertyValues
+                                                    .First(n => n.propertyValueId.ToString() == id)
+                                                    .propertyValueDisplayName;
+                                            }
+                                        }
+
+                                    }
+
+                                    bullet1 += " \", Price for this selection only not for all.";
+                                    childName += " )";
+
+                                    var shipping1StValue = !string.IsNullOrEmpty(productChild.Shipping1ST)
+                                        ? Convert.ToDecimal((productChild.Shipping1ST.Split("|"))[1])
+                                        : 0;
+
+                                    productChild.TotalPrice = productChild.ShippingFee > 0
+                                        ? Convert.ToDecimal(Convert.ToDouble(price.skuVal.actSkuCalPrice) + 0.8) +
+                                          productChild.ShippingFee
+                                        : shipping1StValue +
+                                          Convert.ToDecimal(Convert.ToDouble(price.skuVal.actSkuCalPrice) + 0.8);
+
+
+                                    productChild.ProductName = productChild.ProductName + childName;
+                                    productChild.BuyingPrice = Convert.ToDecimal(price.skuVal.actSkuCalPrice);
+                                    productChild.Bullet1ST = bullet1;
+                                    productChild.ParentSku = productChild.ProductId;
+                                    productChild.RelationshipType = "Variation";
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            //single product
+                            foreach (var price in prices)
+                            {
+
+
+                                var shipping1StValue = !string.IsNullOrEmpty(productChild.Shipping1ST)
+                                    ? Convert.ToDecimal((productChild.Shipping1ST.Split("|"))[1])
+                                    : 0;
+
+                                productChild.TotalPrice = productChild.ShippingFee > 0
+                                    ? Convert.ToDecimal(Convert.ToDouble(price.skuVal.actSkuCalPrice) + 0.8) +
+                                      productChild.ShippingFee
+                                    : shipping1StValue +
+                                      Convert.ToDecimal(Convert.ToDouble(price.skuVal.actSkuCalPrice) + 0.8);
+
+
+                                productChild.BuyingPrice = Convert.ToDecimal(price.skuVal.actSkuCalPrice);
+
+                            }
+
+
+                        }
+
+                    }
+
+
                 }
 
                 context.SaveChanges();

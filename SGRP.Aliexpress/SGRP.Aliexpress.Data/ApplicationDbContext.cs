@@ -11,13 +11,17 @@ namespace SGRP.Aliexpress.Data
 
 
 
-        public DbSet<Product> Product { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductParent> ProductParents { get; set; }
+        public DbSet<CategoryPath> CategoryPaths { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<Product>().ToTable("Product");
+            builder.Entity<ProductParent>().ToTable("ProductParent");
+            builder.Entity<CategoryPath>().ToTable("CategoryPath");
         }
 
     }

@@ -30,6 +30,9 @@ namespace SGRP.Aliexpress.Bussiness.Models
 
         [JsonProperty(PropertyName = "freightAmount")]
         public ShippingFreightAmount ShippingFreightAmount { get; set; }
+
+        [JsonProperty(PropertyName = "tracking")]
+        public bool Tracking { get; set; }
     }
 
     public class ShippingFreightAmount

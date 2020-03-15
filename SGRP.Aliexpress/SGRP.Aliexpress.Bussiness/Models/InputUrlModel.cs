@@ -4,7 +4,7 @@ namespace SGRP.Aliexpress.Bussiness.Models
 {
     public class InputUrlModel
     {
-        public int Id
+        public long Id
         {
             get
             {
@@ -17,7 +17,17 @@ namespace SGRP.Aliexpress.Bussiness.Models
                 {
                     var categoryId = new Regex("/category/([0-9]+)").Match(Url)
                         .Groups[1].Value.Trim();
-                    int.TryParse(categoryId, out result);
+                    if (string.IsNullOrEmpty(categoryId))
+                    {
+                        var storeId = new Regex("/store/([0-9]+)").Match(Url)
+                            .Groups[1].Value.Trim();
+                        int.TryParse(storeId, out result);
+                        IsCategory = false;
+                    }
+                    else
+                    {
+                        int.TryParse(categoryId, out result);
+                    }
                 }
 
                 return result;
@@ -25,5 +35,7 @@ namespace SGRP.Aliexpress.Bussiness.Models
         }
 
         public string Url { get; set; }
+
+        public bool IsCategory { get; private set; } = true;
     }
 }

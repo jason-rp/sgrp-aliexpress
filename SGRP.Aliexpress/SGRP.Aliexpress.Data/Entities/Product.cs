@@ -18,7 +18,7 @@ namespace SGRP.Aliexpress.Data.Entities
 
         public string Description { get; set; }
 
-        public decimal BuyingPrice { get; set; }
+        public string BuyingPrice { get; set; }
 
         public string ItemLot { get; set; }
 
@@ -26,11 +26,11 @@ namespace SGRP.Aliexpress.Data.Entities
 
         public long StockNumber { get; set; }
 
-        public long CategoryId { get; set; }
+        public long? CategoryId { get; set; }
 
         public string CategoryName { get; set; }
 
-        public long StoreId { get; set; }
+        public long? StoreId { get; set; }
 
         public string StoreName { get; set; }
 
@@ -50,14 +50,13 @@ namespace SGRP.Aliexpress.Data.Entities
 
         public long RatingNumber { get; set; }
 
-        [Column(TypeName = "decimal(18, 2)")]
         public decimal RatingPercent { get; set; }
 
         public string ProcessingTime { get; set; }
 
         public string ShippingCompany { get; set; }
 
-        public decimal ShippingFee { get; set; }
+        public decimal? ShippingFee { get; set; }
 
         public string Shipping1ST { get; set; }
 

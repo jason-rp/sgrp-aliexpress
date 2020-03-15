@@ -16,4 +16,8 @@
     <ProjectReference Include="..\SGRP.Aliexpress.Bussiness\SGRP.Aliexpress.Bussiness.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

@@ -16,7 +16,7 @@ namespace SGRP.Aliexpress.Web.Controllers
         }
         public IActionResult Index()
         {
-            return View(_context.Users.ToList());
+            return View();
         }
 
         public IActionResult Privacy()

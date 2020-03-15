@@ -27,31 +27,31 @@ namespace SGRP.Aliexpress.Web.Config
         //        }
         //    }
         //}
-        public static void Initialize(ApplicationDbContext context)
-        {
-            context.Database.EnsureCreated();
+        //public static void Initialize(ApplicationDbContext context)
+        //{
+        //    context.Database.EnsureCreated();
 
-            if (context.Users.Any())
-            {
-                return;   // DB has been seeded
-            }
+        //    if (context.Users.Any())
+        //    {
+        //        return;   // DB has been seeded
+        //    }
 
-            var users = new List<User>
-            {
-                new User
-                {
-                    Id = 55,
-                    Email = "abc@gmail.com",
-                    Name = "rupicmax"
-                }
-            };
+        //    var users = new List<User>
+        //    {
+        //        new User
+        //        {
+        //            Id = 55,
+        //            Email = "abc@gmail.com",
+        //            Name = "rupicmax"
+        //        }
+        //    };
 
-            foreach (var user in users)
-            {
-                context.Users.Add(user);
-            }
+        //    foreach (var user in users)
+        //    {
+        //        context.Users.Add(user);
+        //    }
 
-            context.SaveChanges();
-        }
+        //    context.SaveChanges();
+        //}
     }
 }

@@ -180,7 +180,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
         private static string GetRandomMailPass(Random rng)
         {
             var text = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-            var result = "ssaintgrupic";
+            var result = "intgrupic";
             for (var i = 0; i < 6; i++)
             {
                 result += GetRandomCharacter(text, rng);

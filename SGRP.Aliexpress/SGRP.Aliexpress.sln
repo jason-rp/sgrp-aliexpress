@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SGRP.Aliexpress.Data", "SGR
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SGRP.Aliexpress.Bussiness", "SGRP.Aliexpress.Bussiness\SGRP.Aliexpress.Bussiness.csproj", "{EC4CF45A-28CC-40E3-9558-CA427C21486F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGRP.Aliexpress.CrawlService", "SGRP.Aliexpress.CrawlService\SGRP.Aliexpress.CrawlService.csproj", "{E61CD078-3D3C-4E61-8A2D-C10C57AC361A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SGRP.Aliexpress.CrawlService", "SGRP.Aliexpress.CrawlService\SGRP.Aliexpress.CrawlService.csproj", "{E61CD078-3D3C-4E61-8A2D-C10C57AC361A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGRP.Aliexpress.Web", "SGRP.Aliexpress.Web\SGRP.Aliexpress.Web.csproj", "{53849035-BE7C-4560-87D1-E4E36E724E50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SGRP.Aliexpress.Web", "SGRP.Aliexpress.Web\SGRP.Aliexpress.Web.csproj", "{53849035-BE7C-4560-87D1-E4E36E724E50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGRP.Aliexpress.Helper", "SGRP.Aliexpress.Helper\SGRP.Aliexpress.Helper.csproj", "{03277007-B292-436E-96F8-68F08A52602F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{53849035-BE7C-4560-87D1-E4E36E724E50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53849035-BE7C-4560-87D1-E4E36E724E50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53849035-BE7C-4560-87D1-E4E36E724E50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03277007-B292-436E-96F8-68F08A52602F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03277007-B292-436E-96F8-68F08A52602F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03277007-B292-436E-96F8-68F08A52602F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03277007-B292-436E-96F8-68F08A52602F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

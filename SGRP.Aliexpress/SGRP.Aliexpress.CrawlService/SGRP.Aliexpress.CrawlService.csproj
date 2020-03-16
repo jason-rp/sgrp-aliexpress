@@ -17,11 +17,13 @@
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.21" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.1" />
+    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SGRP.Aliexpress.Bussiness\SGRP.Aliexpress.Bussiness.csproj" />
     <ProjectReference Include="..\SGRP.Aliexpress.Data\SGRP.Aliexpress.Data.csproj" />
+    <ProjectReference Include="..\SGRP.Aliexpress.Helper\SGRP.Aliexpress.Helper.csproj" />
   </ItemGroup>
 
   <ItemGroup>

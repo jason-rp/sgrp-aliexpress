@@ -8,6 +8,7 @@ using SGRP.Aliexpress.Bussiness.Models;
 using SGRP.Aliexpress.Bussiness.ViewModel;
 using SGRP.Aliexpress.Data;
 using SGRP.Aliexpress.Data.Entities;
+using SGRP.Aliexpress.Helper;
 
 namespace SGRP.Aliexpress.CrawlService.Services
 {
@@ -407,9 +408,11 @@ namespace SGRP.Aliexpress.CrawlService.Services
                     }));
 
 
-                context.Products.AddRange(products);
+                context.Products.UpdateRange(products);
 
                 context.SaveChanges();
+
+                RedisConnectionFactory.GetConnection().GetSubscriber().PublishAsync("aaa", products.Count);
             }
         }
 

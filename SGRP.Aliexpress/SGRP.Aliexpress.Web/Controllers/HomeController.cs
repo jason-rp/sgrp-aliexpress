@@ -1,8 +1,20 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using SGRP.Aliexpress.Bussiness.Models;
 using SGRP.Aliexpress.Data;
+using SGRP.Aliexpress.Helper;
+using SGRP.Aliexpress.Web.Hubs;
+using SGRP.Aliexpress.Web.Interfaces;
 using SGRP.Aliexpress.Web.Models;
+using StackExchange.Redis;
 
 namespace SGRP.Aliexpress.Web.Controllers
 {
@@ -10,14 +22,47 @@ namespace SGRP.Aliexpress.Web.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public HomeController(ApplicationDbContext context)
+        private readonly AliexpressHub _aliexpressHub;
+        public HomeController(ApplicationDbContext context,AliexpressHub aliexpressHub)
         {
             _context = context;
+            _aliexpressHub = aliexpressHub;
         }
-        public IActionResult Index()
+
+        [Route("/Home/Index", Name = "Custom")]
+        public ActionResult Test(RedisCategoryUrlModel model)
         {
+            var data = new RedisMessageModel
+            {
+                IsRun = true,
+                Url = model.Url
+            };
+
+            RedisConnectionFactory.GetConnection().GetSubscriber().Publish("redis::runNode", JsonConvert.SerializeObject(data));
+
+            return RedirectToAction("Index");
+        }
+        public async Task<IActionResult> Index()
+        {
+
+            _ = Task.Factory.StartNew(async () =>
+              {
+                  while (true)
+                  {
+                      try
+                      {
+                          await _aliexpressHub.UpdateTotalCounter();
+                          Thread.Sleep(2000);
+                      }
+                      catch (Exception ex)
+                      {
+                          var t = ex;
+                      }
+                  }
+              });
             return View();
         }
+
 
         public IActionResult Privacy()
         {

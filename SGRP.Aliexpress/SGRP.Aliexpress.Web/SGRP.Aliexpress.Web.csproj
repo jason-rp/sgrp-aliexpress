@@ -9,11 +9,14 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
   </ItemGroup>
 
 
   <ItemGroup>
     <ProjectReference Include="..\SGRP.Aliexpress.Data\SGRP.Aliexpress.Data.csproj" />
+    <ProjectReference Include="..\SGRP.Aliexpress.Helper\SGRP.Aliexpress.Helper.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Runtime.InteropServices;
-using HtmlAgilityPack;
-using Microsoft.EntityFrameworkCore;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using SGRP.Aliexpress.Bussiness.Models;
-using SGRP.Aliexpress.Bussiness.ViewModel;
 using SGRP.Aliexpress.CrawlService.Interfaces;
-using SGRP.Aliexpress.Data;
-using SGRP.Aliexpress.Data.Entities;
+using SGRP.Aliexpress.Helper;
+using StackExchange.Redis;
 
 namespace SGRP.Aliexpress.CrawlService
 {
@@ -19,84 +19,64 @@ namespace SGRP.Aliexpress.CrawlService
         private static ICrawlService _crawlService = new Services.CrawlService();
         static void Main(string[] args)
         {
-            //var str =
-            //    "{\"desc\":{\"score\":\"4.5\",\"ratings\":\"33\",\"percent\":\"-2.47\"},\"seller\":{\"score\":\"4.5\",\"ratings\":\"33\",\"percent\":\"-3.34\"},\"shipping\":{\"score\":\"4.4\",\"ratings\":\"33\",\"percent\":\"-2.98\"}}";
-            //var t1 = JsonConvert.DeserializeObject(str);
-            //var ratingDetails = JsonConvert.DeserializeObject<StoreRatingDetailModel>(str);
-            ////var ratingDetails1 = JsonConvert.DeserializeObject<List<StoreRatingDetailModel>>(t1);
+            var connection = RedisConnectionFactory.GetConnection();
 
-            //var rp = "{\"body\":{\"features\":{},\"freightResult\":[{\"bizShowMind\":{\"layout\":[]},\"commitDay\":\"60\",\"company\":\"China Post Registered Air Mail\",\"currency\":\"USD\",\"discount\":100,\"displayType\":\"deliveryTime\",\"features\":{},\"freightAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $0.00\",\"value\":0},\"fullMailLine\":false,\"hbaService\":false,\"i18nMap\":{},\"id\":0,\"ltDisplayModel\":{\"deliveryDisplayModel\":{\"deliveryTime\":\"Estimated Delivery Time:21-39 Days\",\"fromToInfo\":{\"medusaText\":\"To ${toCountry} via ${freightDisplayName}\",\"placeHolderMap\":{\"freightDisplayName\":\"China Post Registered Air Mail\",\"fromCountry\":\"\",\"toIcon\":\"https://ae01.alicdn.com/kf/Hee93bbbc00b64a7b9bd29ddbcc64e9543.png\",\"fromIcon\":\"\",\"toCountry\":\"Vietnam\"}}},\"highLight\":[],\"serviceInfo\":[],\"shippingFeeInfoModel\":{\"shippingFee\":{\"medusaText\":\"Free Shipping\"}}},\"name\":\"FreightItemModule\",\"notification\":\"\",\"sendGoodsCountry\":\"CN\",\"sendGoodsCountryFullName\":\"China\",\"serviceName\":\"CPAM\",\"standardFreightAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $7.31\",\"value\":7.31},\"time\":\"21-39\",\"tracking\":false},{\"bizShowMind\":{\"layout\":[]},\"commitDay\":\"60\",\"company\":\"AliExpress Standard Shipping\",\"currency\":\"USD\",\"discount\":89,\"displayType\":\"deliveryTime\",\"features\":{},\"freightAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $1.05\",\"value\":1.05},\"fullMailLine\":false,\"hbaService\":false,\"i18nMap\":{},\"id\":0,\"ltDisplayModel\":{\"deliveryDisplayModel\":{\"deliveryTime\":\"Estimated Delivery Time:18-36 Days\",\"fromToInfo\":{\"medusaText\":\"To ${toCountry} via ${freightDisplayName}\",\"placeHolderMap\":{\"freightDisplayName\":\"AliExpress Standard Shipping\",\"fromCountry\":\"\",\"toIcon\":\"https://ae01.alicdn.com/kf/Hee93bbbc00b64a7b9bd29ddbcc64e9543.png\",\"fromIcon\":\"\",\"toCountry\":\"Vietnam\"}}},\"highLight\":[],\"serviceInfo\":[],\"shippingFeeInfoModel\":{\"shippingFee\":{\"medusaText\":\"Shipping: ${shippingFee}\",\"placeHolderMap\":{\"shippingFee\":\"US $1.05\"}}}},\"name\":\"FreightItemModule\",\"sendGoodsCountry\":\"CN\",\"sendGoodsCountryFullName\":\"China\",\"serviceName\":\"CAINIAO_STANDARD\",\"standardFreightAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $9.88\",\"value\":9.88},\"time\":\"18-36\",\"tracking\":false},{\"bizShowMind\":{\"layout\":[]},\"commitDay\":\"35\",\"company\":\"ePacket\",\"currency\":\"USD\",\"discount\":0,\"displayType\":\"deliveryTime\",\"features\":{},\"freightAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $7.03\",\"value\":7.03},\"fullMailLine\":false,\"hbaService\":false,\"i18nMap\":{},\"id\":0,\"ltDisplayModel\":{\"deliveryDisplayModel\":{\"deliveryTime\":\"Estimated Delivery Time:20-35 Days\",\"fromToInfo\":{\"medusaText\":\"To ${toCountry} via ${freightDisplayName}\",\"placeHolderMap\":{\"freightDisplayName\":\"ePacket\",\"fromCountry\":\"\",\"toIcon\":\"https://ae01.alicdn.com/kf/Hee93bbbc00b64a7b9bd29ddbcc64e9543.png\",\"fromIcon\":\"\",\"toCountry\":\"Vietnam\"}}},\"highLight\":[],\"serviceInfo\":[],\"shippingFeeInfoModel\":{\"shippingFee\":{\"medusaText\":\"Shipping: ${shippingFee}\",\"placeHolderMap\":{\"shippingFee\":\"US $7.03\"}}}},\"name\":\"FreightItemModule\",\"sendGoodsCountry\":\"CN\",\"sendGoodsCountryFullName\":\"China\",\"serviceName\":\"EMS_ZX_ZX_US\",\"standardFreightAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $7.03\",\"value\":7.03},\"time\":\"20-35\",\"tracking\":true},{\"bizShowMind\":{\"layout\":[]},\"commitDay\":\"30\",\"company\":\"DHL\",\"currency\":\"USD\",\"discount\":63,\"displayType\":\"deliveryTime\",\"features\":{},\"freightAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $21.05\",\"value\":21.05},\"fullMailLine\":false,\"hbaService\":false,\"i18nMap\":{},\"id\":0,\"ltDisplayModel\":{\"deliveryDisplayModel\":{\"deliveryTime\":\"Estimated Delivery Time:8-17 Days\",\"fromToInfo\":{\"medusaText\":\"To ${toCountry} via ${freightDisplayName}\",\"placeHolderMap\":{\"freightDisplayName\":\"DHL\",\"fromCountry\":\"\",\"toIcon\":\"https://ae01.alicdn.com/kf/Hee93bbbc00b64a7b9bd29ddbcc64e9543.png\",\"fromIcon\":\"\",\"toCountry\":\"Vietnam\"}}},\"highLight\":[],\"serviceInfo\":[],\"shippingFeeInfoModel\":{\"shippingFee\":{\"medusaText\":\"Shipping: ${shippingFee}\",\"placeHolderMap\":{\"shippingFee\":\"US $21.05\"}}}},\"name\":\"FreightItemModule\",\"sendGoodsCountry\":\"CN\",\"sendGoodsCountryFullName\":\"China\",\"serviceName\":\"DHL\",\"standardFreightAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $56.23\",\"value\":56.23},\"time\":\"8-17\",\"tracking\":true}],\"i18nMap\":{},\"name\":\"LogisticsFreightResp\"},\"code\":200,\"cost\":55,\"success\":true}";
-            //var r1 = JsonConvert.DeserializeObject<ShippingContentModel>(rp);
-
-            //var h = "";
-            //var h1 = JsonConvert.DeserializeObject<List<SkuPropertyListModel>>(h);
-
-            //var p = "[{\"skuAttr\":\"14:193#Black Red;200000124:100010483\",\"skuId\":10000001428825054,\"skuPropIds\":\"193,100010483\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":689,\"bulkOrder\":2,\"inventory\":689,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:193#Black Red;200000124:200000337\",\"skuId\":10000001428825056,\"skuPropIds\":\"193,200000337\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":690,\"bulkOrder\":2,\"inventory\":690,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:193#Black Red;200000124:200000364\",\"skuId\":10000001428825052,\"skuPropIds\":\"193,200000364\",\"skuVal\":{\"actSkuBulkCalPrice\":\"9.71\",\"actSkuCalPrice\":\"10.22\",\"actSkuDisplayBulkPrice\":\"US $9.71\",\"actSkuMultiCurrencyBulkPrice\":\"9.71\",\"actSkuMultiCurrencyCalPrice\":\"10.22\",\"actSkuMultiCurrencyDisplayPrice\":\"10.22\",\"availQuantity\":688,\"bulkOrder\":2,\"inventory\":688,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $10.22\",\"value\":10.22},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $17.03\",\"value\":17.03},\"skuBulkCalPrice\":\"16.18\",\"skuCalPrice\":\"17.03\",\"skuDisplayBulkPrice\":\"US $16.18\",\"skuMultiCurrencyBulkPrice\":\"16.18\",\"skuMultiCurrencyCalPrice\":\"17.03\",\"skuMultiCurrencyDisplayPrice\":\"17.03\"}},{\"skuAttr\":\"14:193#Black Red;200000124:100013888\",\"skuId\":10000001428825052,\"skuPropIds\":\"193,100013888\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":692,\"bulkOrder\":2,\"inventory\":692,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:29#white;200000124:3116\",\"skuId\":10000001428825074,\"skuPropIds\":\"29,3116\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":690,\"bulkOrder\":2,\"inventory\":690,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:29#white;200000124:200000899\",\"skuId\":10000001428825076,\"skuPropIds\":\"29,200000899\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":692,\"bulkOrder\":2,\"inventory\":692,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:29#white;200000124:200000338#43\",\"skuId\":10000001428825072,\"skuPropIds\":\"29,200000338\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":688,\"bulkOrder\":2,\"inventory\":688,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:29#white;200000124:100010487\",\"skuId\":10000001428825072,\"skuPropIds\":\"29,100010487\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":691,\"bulkOrder\":2,\"inventory\":691,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:173#Blue;200000124:3116\",\"skuId\":10000001428825066,\"skuPropIds\":\"173,3116\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":664,\"bulkOrder\":2,\"inventory\":664,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:173#Blue;200000124:200000899\",\"skuId\":10000001428825068,\"skuPropIds\":\"173,200000899\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":661,\"bulkOrder\":2,\"inventory\":661,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:173#Blue;200000124:200000338#43\",\"skuId\":10000001428825064,\"skuPropIds\":\"173,200000338\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":645,\"bulkOrder\":2,\"inventory\":645,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:173#Blue;200000124:100010487\",\"skuId\":10000001428825064,\"skuPropIds\":\"173,100010487\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":647,\"bulkOrder\":2,\"inventory\":647,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:29#white;200000124:100010483\",\"skuId\":10000001428825070,\"skuPropIds\":\"29,100010483\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":693,\"bulkOrder\":2,\"inventory\":693,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:29#white;200000124:200000337\",\"skuId\":10000001428825072,\"skuPropIds\":\"29,200000337\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":690,\"bulkOrder\":2,\"inventory\":690,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:29#white;200000124:200000364\",\"skuId\":10000001428825068,\"skuPropIds\":\"29,200000364\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":698,\"bulkOrder\":2,\"inventory\":698,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:29#white;200000124:100013888\",\"skuId\":10000001428825068,\"skuPropIds\":\"29,100013888\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":697,\"bulkOrder\":2,\"inventory\":697,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:193#Black Red;200000124:3116\",\"skuId\":10000001428825058,\"skuPropIds\":\"193,3116\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":686,\"bulkOrder\":2,\"inventory\":686,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:193#Black Red;200000124:200000899\",\"skuId\":10000001428825060,\"skuPropIds\":\"193,200000899\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":687,\"bulkOrder\":2,\"inventory\":687,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:193#Black Red;200000124:200000338#43\",\"skuId\":10000001428825056,\"skuPropIds\":\"193,200000338\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":676,\"bulkOrder\":2,\"inventory\":676,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:193#Black Red;200000124:100010487\",\"skuId\":10000001428825056,\"skuPropIds\":\"193,100010487\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":683,\"bulkOrder\":2,\"inventory\":683,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:173#Blue;200000124:100010483\",\"skuId\":10000001428825062,\"skuPropIds\":\"173,100010483\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":673,\"bulkOrder\":2,\"inventory\":673,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:173#Blue;200000124:200000337\",\"skuId\":10000001428825064,\"skuPropIds\":\"173,200000337\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":655,\"bulkOrder\":2,\"inventory\":655,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:173#Blue;200000124:200000364\",\"skuId\":10000001428825060,\"skuPropIds\":\"173,200000364\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":695,\"bulkOrder\":2,\"inventory\":695,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}},{\"skuAttr\":\"14:173#Blue;200000124:100013888\",\"skuId\":10000001428825060,\"skuPropIds\":\"173,100013888\",\"skuVal\":{\"actSkuBulkCalPrice\":\"12.79\",\"actSkuCalPrice\":\"13.46\",\"actSkuDisplayBulkPrice\":\"US $12.79\",\"actSkuMultiCurrencyBulkPrice\":\"12.79\",\"actSkuMultiCurrencyCalPrice\":\"13.46\",\"actSkuMultiCurrencyDisplayPrice\":\"13.46\",\"availQuantity\":683,\"bulkOrder\":2,\"inventory\":683,\"isActivity\":true,\"optionalWarrantyPrice\":[],\"skuActivityAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $13.46\",\"value\":13.46},\"skuAmount\":{\"currency\":\"USD\",\"formatedAmount\":\"US $22.43\",\"value\":22.43},\"skuBulkCalPrice\":\"21.31\",\"skuCalPrice\":\"22.43\",\"skuDisplayBulkPrice\":\"US $21.31\",\"skuMultiCurrencyBulkPrice\":\"21.31\",\"skuMultiCurrencyCalPrice\":\"22.43\",\"skuMultiCurrencyDisplayPrice\":\"22.43\"}}]";
-            //var p1 = JsonConvert.DeserializeObject<List<SkuPriceList>>(p);
-            //try
+            //var data = _crawlService.GetData(new List<InputUrlModel>
             //{
-            //    using (var context = new DesignTimeDbContextFactory().CreateDbContext())
+            //    new InputUrlModel
             //    {
-            //        using (var transaction = context.Database.BeginTransaction())
-            //        {
-
-            //            var category = new CategoryPath
-            //            {
-            //                Id = 1,
-            //                CategoryId = 1,
-            //                ProductId = 3,
-            //                CatMain = "abccc"
-            //            };
-            //            context.CategoryPaths.Add(category);
-            //            context.SaveChanges();
-            //            transaction.Commit();
-            //            //context.AddRange(products.Where(n => n.IsParent != null && n.IsParent == true).Select(
-            //            //    n => new ProductParent
-            //            //    {
-            //            //        ProductId = n.ProductId
-            //            //    }));
-            //            //context.AddRange(products);
-            //        }
-
+            //        Url = $"https://www.aliexpress.com/category/200002253/patches.html?trafficChannel=main&catName=patches&CatId=200002253&ltype=wholesale&SortType=default&page=1&isrefine=y"
             //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex);
-            //    throw;
-            //}
-            //using (var context = new DesignTimeDbContextFactory().CreateDbContext())
-            //{
 
-            //    context.Products.AddRange(new List<Product>
-            //    {
-            //        new Product
-            //        {
-            //            ProductId = 1,
-            //            ProductKeyId = "1",
-            //            ProductName = "a",
-            //            VariationColor = "a"
-            //        },
-            //        new Product
-            //        {
-            //            ProductId = 1,
-            //            ProductKeyId = "1",
-            //            ProductName = "a",
-            //            VariationColor = "a"
-            //        }
-            //    });
-            //    context.SaveChanges();
-            //}
+            //}).ToList();
 
-
-            var data = _crawlService.GetData(new List<InputUrlModel>
+            var data = new List<RedisMessageModel>();
+            _ = Task.Factory.StartNew(async () =>
             {
-                new InputUrlModel
+                while (true)
                 {
-                    Url = $"https://www.aliexpress.com/category/200002253/patches.html?trafficChannel=main&catName=patches&CatId=200002253&ltype=wholesale&SortType=default&page=1&isrefine=y"
-                }
+                    try
+                    {
+                        RedisMessageModel current;
+                         connection.GetSubscriber().Subscribe("redis::runNode", (c, v) =>
+                        {
+                            if (!string.IsNullOrEmpty(v))
+                            {
+                                current = JsonConvert.DeserializeObject<RedisMessageModel>(v);
 
-            }).ToList();
+                                if (current.IsRun && (data.Count(n => n.Url == current.Url) < 1 || !data.Any()))
+                                {
+                                    var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
+                                    {
+                                        new InputUrlModel
+                                        {
+                                            Url = current.Url
+                                        }
+
+                                    }).ToList();
+                                }
+
+                                data.Add(current);
+                            }
+
+                        });
+
+
+
+
+                        Thread.Sleep(2000);
+                    }
+                    catch (Exception ex)
+                    {
+                        var t = ex;
+                    }
+                }
+            });
+
+
+
+
+
 
 
 

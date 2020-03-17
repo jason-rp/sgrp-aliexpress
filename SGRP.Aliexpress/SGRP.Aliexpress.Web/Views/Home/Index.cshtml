@@ -4,21 +4,42 @@
 }
 @model SGRP.Aliexpress.Bussiness.Models.RedisCategoryUrlModel
 <div class="container">
+
     <form method="post">
-        <div class="row">&nbsp;</div>
-        <div class="row">
+
+        <fieldset class="border p-2">
+            <legend class="w-auto">Categories & Store URL</legend>
+            <div class="row">&nbsp;</div>
+            @*<div class="row">
             <div class="col-2">Categories URL</div>
-            <div class="col-10"><input style="width: 100%" asp-for="Url" /></div>
-        </div>
-        <input type="button" value="Add" onclick="AddTextBox()" />
-        <div id="divCont">
+            <div class="col-10"><input style="width: 100%" asp-for="Url" type="text" class="form-control" /></div>
+        </div>*@
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-4"></div>
+                <div class="col-4" style="text-align: center;">
+                    <input type="button" value="Add" onclick="AddTextBox()" class="btn btn-dark" style="width: 150px" />
+                </div>
+                <div class="col-4"></div>
+            </div>
+            <div class="row">&nbsp;</div>
+            <div class="row">
+                <div class="col-2"></div>
+                <div class="col-10">
+                    <div id="divCont">
 
-        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
 
         <div class="row">&nbsp;</div>
         <div class="row">
+            <div class="col-6" style="text-align: right;">
+                <button asp-route="AddCat" class="btn btn-primary"  style="width: 120px;">START</button>
+            </div>
             <div class="col-6">
-                <button asp-route="Custom">START</button>
+                <button class="btn btn-primary" type="button" style="width: 120px;">CANCEL ALL</button>
             </div>
         </div>
     </form>
@@ -46,7 +67,7 @@
         function GetDynamicTextbox(value) {
             return '<div id="frd" class="form-row">' +
                 '<div id = "fr" class="col-md-7 mb-3" >' +
-                '<input type="text" name="txttest" class="form-control" /></div >' +
+                '<input type="text" name="Url" id="Url" class="form-control" /></div >' +
                 '<div ="cd" class="col-md-3 mb-3" > <input type="button" onclick="RemoveTextBox(this)" value="Remove" class="btn btn-primary" /></div ></div > ';
         }
 
@@ -54,6 +75,7 @@
             document.getElementById("divCont").removeChild(div.parentNode.parentNode.parentNode);
         }
     </script>
-    <script src="~/js/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/site.js"></script>
+
 }
+<script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/site.js"></script>

@@ -2,21 +2,13 @@
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/aliexpressHub").build();
 
-//Disable send button until connection is established
-//document.getElementById("sendButton").disabled = true;
 
 connection.on("ReceiveMessage", function (user, message) {
-    //var msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    //var encodedMsg = user + " says " + message;
-    //var li = document.createElement("li");
-    //li.textContent = encodedMsg;
-    //document.getElementById("messagesList").appendChild(li);
-    //document.getElementById("messagesList").setAttribute('value', message);
     document.getElementById('messagesList').innerHTML = message;
 });
 
 connection.start().then(function () {
-    //document.getElementById("sendButton").disabled = false;
+
 }).catch(function (err) {
     return console.error(err.toString());
 });

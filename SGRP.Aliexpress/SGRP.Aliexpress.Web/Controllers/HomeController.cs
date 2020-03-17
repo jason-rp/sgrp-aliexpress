@@ -29,19 +29,22 @@ namespace SGRP.Aliexpress.Web.Controllers
             _aliexpressHub = aliexpressHub;
         }
 
-        [Route("/Home/Index", Name = "Custom")]
-        public ActionResult Test(RedisCategoryUrlModel model)
+        [Route("/Home/Index", Name = "AddCat")]
+        public ActionResult RedisCategory(RedisCategoryUrlModel model)
         {
-            var data = new RedisMessageModel
-            {
-                IsRun = true,
-                Url = model.Url
-            };
+            //var data = new RedisMessageModel
+            //{
+            //    IsRun = true,
+            //    Url = model.Url
+            //};
 
-            RedisConnectionFactory.GetConnection().GetSubscriber().Publish("redis::runNode", JsonConvert.SerializeObject(data));
+            //RedisConnectionFactory.GetConnection().GetSubscriber().Publish("redis::runNode", JsonConvert.SerializeObject(data));
 
             return RedirectToAction("Index");
         }
+
+
+
         public async Task<IActionResult> Index()
         {
 

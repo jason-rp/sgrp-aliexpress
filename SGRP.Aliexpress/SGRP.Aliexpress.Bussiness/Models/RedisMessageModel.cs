@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SGRP.Aliexpress.Bussiness.Models
 {
-    public class RedisMessageModel
+    public class RedisMessageModel 
     {
         public bool IsRun { get; set; }
 
@@ -13,6 +13,6 @@ namespace SGRP.Aliexpress.Bussiness.Models
 
     public class RedisCategoryUrlModel
     {
-        public string Url { get; set; }
+        public string[] Url { get; set; }
     }
 }

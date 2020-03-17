@@ -15,9 +15,9 @@ namespace SGRP.Aliexpress.Web.Hubs
             if (Clients != null)
             {
                 var connection = RedisConnectionFactory.GetConnection();
-                connection.GetSubscriber().Subscribe("aaa", (c, v) =>
+                connection.GetSubscriber().Subscribe("redis::totalCounter", (c, v) =>
                 {
-                    Clients.All.SendAsync("ReceiveMessage","rupic" ,v);
+                    Clients.All.SendAsync("ReceiveMessage","*" ,v);
                 });
             }
             return Task.CompletedTask;

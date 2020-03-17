@@ -60,7 +60,6 @@ namespace SGRP.Aliexpress.Web
                     .AllowAnyOrigin()
                     .AllowCredentials();
             }));
-            
 
         }
 

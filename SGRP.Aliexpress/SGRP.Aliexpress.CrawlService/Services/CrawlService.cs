@@ -26,7 +26,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
             {
 
                 var executeNodeResult = Node("nodescript.js",
-                    "\"" + -101 + "\"" + " \"" + GetLoginUrlFromCategory(url) + "\"" + " \"" + url.Id + "\"" + " \"" +
+                    "\"" + -101 + "\"" + " \"" + GetLoginUrl(url) + "\"" + " \"" + url.Id + "\"" + " \"" +
                     GetRandomMailPass(Random) + "\"", ref pid);
 
                 if (executeNodeResult.Count == 1)
@@ -41,15 +41,8 @@ namespace SGRP.Aliexpress.CrawlService.Services
             return result;
         }
 
-        public List<UserInfoViewModel> GetData(List<StoreViewModel> urls)
-        {
-            var result = new List<UserInfoViewModel>();
 
-            return result;
-        }
-
-
-        public string GetLoginUrlFromCategory(InputUrlModel model)
+        public string GetLoginUrl(InputUrlModel model)
         {
             string result;
             using (var client = new HttpClient())
@@ -64,27 +57,13 @@ namespace SGRP.Aliexpress.CrawlService.Services
                         var collection = document.DocumentNode.SelectNodes("//script");
                         if (collection.Count != 1) return result;
                         var loginUrl = new Regex("location.href=\"(.*?)\"\\)").Match(collection[0].InnerHtml)
-                                           .Groups[1].Value.Trim() + "\")";
+                            .Groups[1].Value.Trim() + "\")";
                         result = FilterUrl(loginUrl);
                     }
                 }
             }
+
             return result;
-        }
-
-        private UserInfoViewModel GetDetailData(string detailUrl)
-        {
-            try
-            {
-               
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-
-
-            return null;
         }
 
         private static string FilterUrl(string url)

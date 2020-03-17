@@ -54,9 +54,11 @@ namespace SGRP.Aliexpress.CrawlService
                                         }
 
                                     }).ToList();
+
+                                    data.Add(current);
                                 }
 
-                                data.Add(current);
+                                
                             }
 
                         });

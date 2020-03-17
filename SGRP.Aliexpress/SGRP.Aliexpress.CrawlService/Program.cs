@@ -30,33 +30,55 @@ namespace SGRP.Aliexpress.CrawlService
 
             //}).ToList();
 
-            var data = new List<RedisMessageModel>();
+            var data = new List<string>();
             _ = Task.Factory.StartNew(async () =>
             {
                 while (true)
                 {
                     try
                     {
-                        RedisMessageModel current;
+                        RedisMessageModel currents;
                          connection.GetSubscriber().Subscribe("redis::runNode", (c, v) =>
                         {
                             if (!string.IsNullOrEmpty(v))
                             {
-                                current = JsonConvert.DeserializeObject<RedisMessageModel>(v);
+                                currents = JsonConvert.DeserializeObject<RedisMessageModel>(v);
 
-                                if (current.IsRun && (data.Count(n => n.Url == current.Url) < 1 || !data.Any()))
+                                if (currents.IsRun)
                                 {
-                                    var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
+                                    foreach (var url in currents.Urls)
                                     {
-                                        new InputUrlModel
+                                        if (data.Count(n => n == url) < 1 || !data.Any())
                                         {
-                                            Url = current.Url
+                                            var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
+                                                {
+                                                    new InputUrlModel
+                                                    {
+                                                        Url = url
+                                                    }
+
+                                                }).ToList();
+                                            data.Add(url);
                                         }
-
-                                    }).ToList();
-
-                                    data.Add(current);
+                                    }
                                 }
+
+
+
+
+                                //if (current.IsRun && (data.Count(n => n.Url == current.Url) < 1 || !data.Any()))
+                                //{
+                                //    var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
+                                //    {
+                                //        new InputUrlModel
+                                //        {
+                                //            Url = current.Url
+                                //        }
+
+                                //    }).ToList();
+
+                                //    data.Add(current);
+                                //}
 
                                 
                             }

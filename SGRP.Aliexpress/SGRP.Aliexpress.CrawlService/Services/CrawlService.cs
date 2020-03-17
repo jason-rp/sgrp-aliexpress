@@ -26,7 +26,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
             {
 
                 var executeNodeResult = Node("nodescript.js",
-                    "\"" + -101 + "\"" + " \"" + GetLoginUrl(url) + "\"" + " \"" + url.Id + "\"" + " \"" +
+                    "\"" + -101 + "\"" + " \"" + GetLoginUrl(url) + "\"" + " \"" + url.Id + "\"" + " \"" + url.IsCategory + "\""  + " \"" +
                     GetRandomMailPass(Random) + "\"", ref pid);
 
                 if (executeNodeResult.Count == 1)
@@ -45,23 +45,31 @@ namespace SGRP.Aliexpress.CrawlService.Services
         public string GetLoginUrl(InputUrlModel model)
         {
             string result;
-            using (var client = new HttpClient())
+            if (model.IsCategory)
             {
-                using (var response = client.GetAsync(model.Url).Result)
+                using (var client = new HttpClient())
                 {
-                    using (var content = response.Content)
+                    using (var response = client.GetAsync(model.FormattedUrl).Result)
                     {
-                        result = content.ReadAsStringAsync().Result;
-                        var document = new HtmlDocument();
-                        document.LoadHtml(result);
-                        var collection = document.DocumentNode.SelectNodes("//script");
-                        if (collection.Count != 1) return result;
-                        var loginUrl = new Regex("location.href=\"(.*?)\"\\)").Match(collection[0].InnerHtml)
-                            .Groups[1].Value.Trim() + "\")";
-                        result = FilterUrl(loginUrl);
+                        using (var content = response.Content)
+                        {
+                            result = content.ReadAsStringAsync().Result;
+                            var document = new HtmlDocument();
+                            document.LoadHtml(result);
+                            var collection = document.DocumentNode.SelectNodes("//script");
+                            if (collection.Count != 1) return result;
+                            var loginUrl = new Regex("location.href=\"(.*?)\"\\)").Match(collection[0].InnerHtml)
+                                .Groups[1].Value.Trim() + "\")";
+                            result = FilterUrl(loginUrl);
+                        }
                     }
                 }
             }
+            else
+            {
+                result = $"https://login.aliexpress.com/?from=sm&return_url=https://www.aliexpress.com/store/all-wholesale-products/{model.Id}.html?scene=allproducts";
+            }
+
 
             return result;
         }
@@ -85,7 +93,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
         public static List<string> Node(string fileName, string command, ref int pId, string dir = "Node",
             int timeout = 0)
         {
-            var isDebug = false;
+            var isDebug = true;
 
             var result = new List<string>();
             try

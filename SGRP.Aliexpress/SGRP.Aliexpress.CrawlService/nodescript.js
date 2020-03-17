@@ -6,7 +6,8 @@ let Args = process.argv.slice(2);
 var _loginCase = parseInt(Args[0]);
 var __loginUrl = Args[1];
 var _loginUrlId = Args[2];
-var __Mp = Args[3];
+var __isCategory = Args[3];
+var __Mp = Args[4];
 
 
 var cookie_all;
@@ -100,7 +101,16 @@ const registerNewAccount = async () => {
     if (__Signin) {
         await __Signin.click();
     }
+
+    await __Set_TOut(5000);
+
+    const [__shopNow] = await page.$x('//*[@id="expressbuyerlogin"]/div/div/div[3]/a');
+    if (__shopNow) {
+        await __shopNow.click();
+    }
+
     await __Set_TOut(3000);
+
     var __Prepairing_Ajax = false;
 
     let __Data_Shipping_jSon = "";
@@ -115,12 +125,12 @@ const registerNewAccount = async () => {
         }
         else if (response.url().startsWith('https://feedback.aliexpress.com') && response.url().indexOf('/display/evaluationDsrAjaxService.htm?callback=') !== 1) {
             if (__Prepairing_Ajax) {
-                var __Temp = await response.text() || "Deo Co Dau Ma Tim";
+                var __Temp = await response.text() || "Error:::";
                 if (JSON.stringify(__Temp).indexOf('jQuery') !== -1) {
                     __Data_AJAX = __Temp;
                 }
                 else {
-                    __Data_AJAX = "Cai Quan Que Gi The Nay: " + response.url();
+                    __Data_AJAX = "Error >>: " + response.url();
                 }
                 __Done_Url_AJAX = true;
                 __Prepairing_Ajax = false;
@@ -132,7 +142,7 @@ const registerNewAccount = async () => {
     });
     //get all item in each category
     var rpss = [];
-    for (var j = 1; j <= 1; j++) {
+    for (var j = 1; j <= 3; j++) {
         var crawlItem = {
             categoryId: -1,
             categoryName: "",
@@ -154,69 +164,105 @@ const registerNewAccount = async () => {
             ratingNumber: 0,
             ratingPercentNumber: "",
             shippingContent: "",
-            onTimeDelivery: "",
             imagePathList: "",
             specificationHtml: "",
-            storeRatingMultiple: ""
+            storeRatingMultiple: "",
+            productSKUPropertyList: "",
+            skuPriceList: "",
+            specification1: "",
+            specification2: "",
+            specification3: "",
+            specification4: "",
         };
 
-        var urlItem = 'https://www.aliexpress.com/category/' + _loginUrlId + '/patches.html?trafficChannel=main&catName=patches&CatId='
-            + _loginUrlId + '&ltype=wholesale&SortType=default&page='
-            + j + '&isrefine=y';
-        await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
-
-
-        //get categoryName
-        var redifineCategory = await page.evaluate(() => {
-            return window.runParams === undefined ? undefined : window.runParams.refineCategory;
-        });
-        if (redifineCategory === undefined) {
-            console.log("loi slide");
-            await page.waitForSelector('.nc_iconfont.btn_slide');
-            let sliderElement = await page.$('.slidetounlock');
-            let slider = await sliderElement.boundingBox();
-
-            let slideHandle = await page.$('.nc_iconfont.btn_slide');
-            let handle = await slideHandle.boundingBox();
-
-            await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
-            await page.mouse.down();
-            await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
-            await page.mouse.up();
-            await __Set_TOut(3000);
+        var urlItem = "";
+        if (__isCategory === true) {
+            urlItem = 'https://www.aliexpress.com/category/' + _loginUrlId + '/patches.html?trafficChannel=main&catName=patches&CatId='
+                + _loginUrlId + '&ltype=wholesale&SortType=default&page='
+                + j + '&isrefine=y';
         }
         else {
-            if (redifineCategory.length > 0) {
-                crawlItem.categoryName = redifineCategory[0].categoryName;
-                var pthCategory = "";
-                if (redifineCategory[0].pathCategories.length > 0) {
-                    for (var g in redifineCategory[0].pathCategories) {
-                        if (pthCategory === "") {
-                            pthCategory += redifineCategory[0].pathCategories[g].categoryEnName;
-                        }
-                        else {
-                            pthCategory += "|" + redifineCategory[0].pathCategories[g].categoryEnName;
+            urlItem = 'https://www.aliexpress.com/store/' + _loginUrlId + '/search/' + j + '.html';
+        }
+
+        await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
+
+        let runParams = [];
+        if (__isCategory === true) {
+            //get categoryName
+            var redifineCategory = await page.evaluate(() => {
+                return window.runParams === undefined ? undefined : window.runParams.refineCategory;
+            });
+            if (redifineCategory === undefined) {
+                console.log("loi slide");
+                await page.waitForSelector('.nc_iconfont.btn_slide');
+                let sliderElement = await page.$('.slidetounlock');
+                let slider = await sliderElement.boundingBox();
+
+                let slideHandle = await page.$('.nc_iconfont.btn_slide');
+                let handle = await slideHandle.boundingBox();
+
+                await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+                await page.mouse.down();
+                await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
+                await page.mouse.up();
+                await __Set_TOut(3000);
+            }
+            else {
+                if (redifineCategory.length > 0) {
+                    crawlItem.categoryName = redifineCategory[0].categoryName;
+                    var pthCategory = "";
+                    if (redifineCategory[0].pathCategories.length > 0) {
+                        for (var g in redifineCategory[0].pathCategories) {
+                            if (pthCategory === "") {
+                                pthCategory += redifineCategory[0].pathCategories[g].categoryEnName;
+                            }
+                            else {
+                                pthCategory += "|" + redifineCategory[0].pathCategories[g].categoryEnName;
+                            }
                         }
                     }
                 }
             }
+            runParams = await page.evaluate(() => {
+                return window.runParams.items;
+            });
+        }
+        else {
+            await page.waitForSelector('.ui-box-body');
+            let selector = await page.$('.items-list util-clearfix');
+            let storeLinks = await page.evaluate(() =>
+                Array.from(
+                    document.querySelectorAll('a[href]'),
+                    a => a.getAttribute('href')
+                ), selector
+            );
+            for (var storeLink in storeLinks) {
+
+                if (storeLinks[storeLink].indexOf("aliexpress.com/item/") > -1) {
+                    runParams.push({
+                        productDetailUrl: storeLinks[storeLink]
+                    });
+                }
+            }
+
+            // let textJson = JSON.stringify(text);
+            // console.log(textJson);
         }
 
 
-        var runParams = await page.evaluate(() => {
-            return window.runParams.items;
-        });
-
         for (var i in runParams) {
             try {
+                console.log("vo maaa");
                 var item = runParams[i];
+                console.log(JSON.stringify(item));
                 await page.goto('https:' + item.productDetailUrl, { waitUntil: 'domcontentloaded' });
 
                 var windowrunParams = await page.evaluate(() => {
                     return window.runParams === undefined ? "udfi" : window.runParams;
                 });
 
-                if (windowrunParams === "udfi") {
+                if (windowrunParams === "udfi" && __isCategory === true) {
                     const [__Username_a] = await page.$x('//*[@id="fm-login-id"]');
                     if (__Username_a) {
                         console.log("loi login");
@@ -246,20 +292,8 @@ const registerNewAccount = async () => {
                 }
                 else {
 
-                    //get color
-                    if (windowrunParams.data.skuModule.hasSkuProperty == true) {
-                        var skuStr = "";
-                        for (var prop in windowrunParams.data.skuModule.productSKUPropertyList) {
-                            var currentProp = windowrunParams.data.skuModule.productSKUPropertyList[prop];
-                            skuStr += currentProp.skuPropertyName + ":";
-                            var skuItems = currentProp.skuPropertyValues;
-                            for (var skuItem in skuItems) {
-                                skuStr += skuStr === "" ? skuItems[skuItem].propertyValueDisplayName : "|" + skuItems[skuItem].propertyValueDisplayName;
-                            }
-                            skuStr += "::";
-                        }
-                        crawlItem.productSkuProps = skuStr;
-                    }
+                    crawlItem.productSKUPropertyList = windowrunParams.data.skuModule.productSKUPropertyList != undefined ? JSON.stringify(windowrunParams.data.skuModule.productSKUPropertyList) : "";
+                    crawlItem.skuPriceList = JSON.stringify(windowrunParams.data.skuModule.skuPriceList);
 
 
                     crawlItem.categoryId = windowrunParams.data.commonModule.categoryId;
@@ -273,15 +307,15 @@ const registerNewAccount = async () => {
                     let text = await page.evaluate(() => document.getElementsByClassName('product-overview')[0].innerHTML);
                     let textJson = JSON.stringify(text);
 
-                    let textReplace = textJson.replace('<p>', '::p::');
-                    textReplace = textReplace.replace('</p>', '::_p::');
+                    let textReplace = textJson.replace('<span>', '::span::');
+                    textReplace = textReplace.replace('</span>', '::_span::');
                     textReplace = textReplace.replace('<strong>', '::strong::');
                     textReplace = textReplace.replace('</strong>', '::_strong::');
-
+                    textReplace = textReplace.replace(/<script>.*?<\/script>/ig, "");
                     var newString = textReplace.replace(/<.*?>/ig, "");
 
-                    let description = newString.replace('::p::', '<p>');
-                    description = description.replace('::_p::', '</p>');
+                    let description = newString.replace('::span::', '<span>');
+                    description = description.replace('::_span::', '</span>');
                     description = description.replace('::strong::', '<strong>');
                     description = description.replace('::_strong::', '</strong>');
 
@@ -321,6 +355,22 @@ const registerNewAccount = async () => {
                             if (elementPath < 11) {
                                 specHtml += "<p>" + windowrunParams.data.specsModule.props[elementPath].attrName + " : "
                                     + windowrunParams.data.specsModule.props[elementPath].attrValue + "</p>";
+                            }
+                            if (elementPath == 0) {
+                                crawlItem.specification1 = windowrunParams.data.specsModule.props[elementPath].attrName
+                                    + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
+                            }
+                            else if (elementPath == 1) {
+                                crawlItem.specification2 = windowrunParams.data.specsModule.props[elementPath].attrName
+                                    + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
+                            }
+                            else if (elementPath == 2) {
+                                crawlItem.specification3 = windowrunParams.data.specsModule.props[elementPath].attrName
+                                    + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
+                            }
+                            else if (elementPath == 3) {
+                                crawlItem.specification4 = windowrunParams.data.specsModule.props[elementPath].attrName
+                                    + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
                             }
                         }
                     }
@@ -399,7 +449,6 @@ const registerNewAccount = async () => {
 
                     //end crawl
                     rpss.push(crawlItem);
-                    break;
                 }
 
             }

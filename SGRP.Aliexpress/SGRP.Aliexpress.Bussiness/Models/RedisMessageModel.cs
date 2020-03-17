@@ -8,11 +8,11 @@ namespace SGRP.Aliexpress.Bussiness.Models
     {
         public bool IsRun { get; set; }
 
-        public string Url { get; set; }
+        public List<string> Urls { get; set; }
     }
 
     public class RedisCategoryUrlModel
     {
-        public string[] Url { get; set; }
+        public List<string> Urls { get; set; }
     }
 }

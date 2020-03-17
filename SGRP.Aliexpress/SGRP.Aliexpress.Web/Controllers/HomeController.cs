@@ -32,13 +32,18 @@ namespace SGRP.Aliexpress.Web.Controllers
         [Route("/Home/Index", Name = "AddCat")]
         public ActionResult RedisCategory(RedisCategoryUrlModel model)
         {
-            //var data = new RedisMessageModel
-            //{
-            //    IsRun = true,
-            //    Url = model.Url
-            //};
+            if (model.Urls.Any())
+            {
+                var data = new RedisMessageModel
+                {
+                    IsRun = true,
+                    Urls = new List<string>()
+                };
 
-            //RedisConnectionFactory.GetConnection().GetSubscriber().Publish("redis::runNode", JsonConvert.SerializeObject(data));
+                model.Urls.ForEach(n => data.Urls.Add(n));
+
+                RedisConnectionFactory.GetConnection().GetSubscriber().Publish("redis::runNode", JsonConvert.SerializeObject(data));
+            }
 
             return RedirectToAction("Index");
         }

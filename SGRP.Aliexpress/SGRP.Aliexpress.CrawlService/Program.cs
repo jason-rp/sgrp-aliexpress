@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -42,44 +43,40 @@ namespace SGRP.Aliexpress.CrawlService
                         {
                             if (!string.IsNullOrEmpty(v))
                             {
-                                currents = JsonConvert.DeserializeObject<RedisMessageModel>(v);
-
-                                if (currents.IsRun)
+                                if (v == "Cancel")
                                 {
-                                    foreach (var url in currents.Urls)
+                                    foreach (var node in Process.GetProcessesByName("node"))
                                     {
-                                        if (data.Count(n => n == url) < 1 || !data.Any())
+                                        node.Kill();
+                                    }
+                                    //Environment.Exit(0);
+                                }
+                                else
+                                {
+                                    currents = JsonConvert.DeserializeObject<RedisMessageModel>(v);
+
+                                    if (currents.IsRun)
+                                    {
+                                        var signalRKeyId = 1;
+                                        foreach (var url in currents.Urls)
                                         {
-                                            var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
+                                            if (data.Count(n => n == url) < 1 || !data.Any())
+                                            {
+                                                var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
                                                 {
                                                     new InputUrlModel
                                                     {
-                                                        Url = url
+                                                        Url = url,
+                                                        SignalRKeyId = signalRKeyId
                                                     }
 
                                                 }).ToList();
-                                            data.Add(url);
+                                                data.Add(url);
+                                                signalRKeyId += 1;
+                                            }
                                         }
                                     }
                                 }
-
-
-
-
-                                //if (current.IsRun && (data.Count(n => n.Url == current.Url) < 1 || !data.Any()))
-                                //{
-                                //    var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
-                                //    {
-                                //        new InputUrlModel
-                                //        {
-                                //            Url = current.Url
-                                //        }
-
-                                //    }).ToList();
-
-                                //    data.Add(current);
-                                //}
-
                                 
                             }
 
@@ -96,11 +93,6 @@ namespace SGRP.Aliexpress.CrawlService
                     }
                 }
             });
-
-
-
-
-
 
 
 

@@ -23,14 +23,40 @@ namespace SGRP.Aliexpress.Web.Controllers
         private readonly ApplicationDbContext _context;
 
         private readonly AliexpressHub _aliexpressHub;
-        public HomeController(ApplicationDbContext context,AliexpressHub aliexpressHub)
+
+        public HomeController(ApplicationDbContext context, AliexpressHub aliexpressHub)
         {
             _context = context;
             _aliexpressHub = aliexpressHub;
         }
 
-        [Route("/Home/Index", Name = "AddCat")]
-        public ActionResult RedisCategory(RedisCategoryUrlModel model)
+        //[Route("/Home/Index", Name = "AddCat")]
+        //public ActionResult RedisCategory(RedisCategoryUrlModel model)
+        //{
+        //    if (model.Urls.Any())
+        //    {
+        //        var data = new RedisMessageModel
+        //        {
+        //            IsRun = true,
+        //            Urls = new List<string>()
+        //        };
+
+        //        model.Urls.ForEach(n => data.Urls.Add(n));
+
+        //        RedisConnectionFactory.GetConnection().GetSubscriber().Publish("redis::runNode", JsonConvert.SerializeObject(data));
+        //    }
+
+        //    return RedirectToAction("Index");
+
+        //}
+
+
+        public void Cancel()
+        {
+            RedisConnectionFactory.GetConnection().GetSubscriber().Publish("redis::runNode", "Cancel");
+        }
+
+        public void RedisCategory(RedisCategoryUrlModel model)
         {
             if (model.Urls.Any())
             {
@@ -45,14 +71,11 @@ namespace SGRP.Aliexpress.Web.Controllers
                 RedisConnectionFactory.GetConnection().GetSubscriber().Publish("redis::runNode", JsonConvert.SerializeObject(data));
             }
 
-            return RedirectToAction("Index");
         }
-
 
 
         public async Task<IActionResult> Index()
         {
-
             _ = Task.Factory.StartNew(async () =>
               {
                   while (true)

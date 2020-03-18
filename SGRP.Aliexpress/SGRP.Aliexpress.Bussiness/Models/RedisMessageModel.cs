@@ -14,5 +14,6 @@ namespace SGRP.Aliexpress.Bussiness.Models
     public class RedisCategoryUrlModel
     {
         public List<string> Urls { get; set; }
+
     }
 }

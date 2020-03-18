@@ -1,19 +1,16 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
-
+    
 }
 @model SGRP.Aliexpress.Bussiness.Models.RedisCategoryUrlModel
 <div class="container">
+    <input type="hidden" id="signalRCounterHidden" value="0"/>
 
-    <form method="post">
+    <form id="frm_ss" method="post">
 
         <fieldset class="border p-2">
             <legend class="w-auto">Categories & Store URL</legend>
             <div class="row">&nbsp;</div>
-            @*<div class="row">
-            <div class="col-2">Categories URL</div>
-            <div class="col-10"><input style="width: 100%" asp-for="Url" type="text" class="form-control" /></div>
-        </div>*@
             <div class="row">&nbsp;</div>
             <div class="row">
                 <div class="col-4"></div>
@@ -36,10 +33,10 @@
         <div class="row">&nbsp;</div>
         <div class="row">
             <div class="col-6" style="text-align: right;">
-                <button asp-route="AddCat" class="btn btn-primary"  style="width: 120px;">START</button>
+                <button class="btn btn-primary" id="btnStart" style="width: 120px;">START</button>
             </div>
             <div class="col-6">
-                <button class="btn btn-primary" type="button" style="width: 120px;">CANCEL ALL</button>
+                <button  class="btn btn-primary" id="btnCancel" style="width: 120px;">CANCEL ALL</button>
             </div>
         </div>
     </form>
@@ -59,21 +56,55 @@
 @section Scripts{
     <script>
         function AddTextBox() {
+
             var div = document.createElement('DIV');
-            div.innerHTML = GetDynamicTextbox("");
+            div.innerHTML = GetDynamicTextbox();
             document.getElementById("divCont").appendChild(div);
         }
 
-        function GetDynamicTextbox(value) {
+        function GetDynamicTextbox() {
+
+            var id = parseInt($('#signalRCounterHidden').val()) + 1;
+            $('#signalRCounterHidden').val(id);
+
             return '<div id="frd" class="form-row">' +
+                '<div style="padding-top: 8px;" class="col-md-2 mb-2">Done: <label id= "txtSignalR-' +
+                id +
+                '"></label></div>' +
                 '<div id = "fr" class="col-md-7 mb-3" >' +
                 '<input type="text" name="Urls" id="Urls" class="form-control" /></div >' +
                 '<div ="cd" class="col-md-3 mb-3" > <input type="button" onclick="RemoveTextBox(this)" value="Remove" class="btn btn-primary" /></div ></div > ';
         }
 
         function RemoveTextBox(div) {
+            var id = parseInt($('#signalRCounterHidden').val()) - 1;
+            $('#signalRCounterHidden').val(id);
+
             document.getElementById("divCont").removeChild(div.parentNode.parentNode.parentNode);
         }
+
+        $("#frm_ss").submit(function(e) {
+            e.preventDefault();
+
+            var id = $(document.activeElement).attr('id');
+            if (id === "btnStart") {
+                $.ajax({
+                    url: '/Home/RedisCategory',
+                    data: $("#frm_ss").serialize()
+                }).done(function() {
+
+                });
+            } else {
+                $.ajax({
+                    url: '/Home/Cancel',
+                    data: {}
+                }).done(function() {
+
+                });
+            }
+
+
+        });
     </script>
 
 }

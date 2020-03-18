@@ -93,7 +93,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
         public static List<string> Node(string fileName, string command, ref int pId, string dir = "Node",
             int timeout = 0)
         {
-            var isDebug = true;
+            var isDebug = false;
 
             var result = new List<string>();
             try

@@ -53,5 +53,7 @@ namespace SGRP.Aliexpress.Bussiness.Models
         }
 
         public bool IsCategory => new Regex("/category/([0-9]+)").IsMatch(Url);
+
+        public int SignalRKeyId { get; set; }
     }
 }

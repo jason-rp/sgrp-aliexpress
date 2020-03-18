@@ -412,7 +412,11 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
                 context.SaveChanges();
 
-                //RedisConnectionFactory.GetConnection().GetSubscriber().PublishAsync("redis::totalCounter", products.Count);
+                RedisConnectionFactory.GetConnection().GetSubscriber().PublishAsync("redis::singleCount-" + inputUrlModel.SignalRKeyId, products.Count);
+
+                var totalCount = context.Products.Count();
+
+                RedisConnectionFactory.GetConnection().GetSubscriber().PublishAsync("redis::totalCounter", totalCount);
             }
         }
 

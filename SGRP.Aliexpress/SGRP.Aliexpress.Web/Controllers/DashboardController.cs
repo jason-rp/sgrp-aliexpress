@@ -18,63 +18,63 @@ namespace SGRP.Aliexpress.Web.Controllers
             var lstModel = new List<SimpleReportViewModel>();
             lstModel.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Brazil",
+                DimensionOne = "Jan",
                 Quantity = rnd.Next(10)
             });
             lstModel.Add(new SimpleReportViewModel
             {
-                DimensionOne = "USA",
+                DimensionOne = "Feb",
                 Quantity = rnd.Next(10)
             });
             lstModel.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Portugal",
+                DimensionOne = "Mar",
                 Quantity = rnd.Next(10)
             });
             lstModel.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Russia",
+                DimensionOne = "Apr",
                 Quantity = rnd.Next(10)
             });
             lstModel.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Ireland",
+                DimensionOne = "May",
                 Quantity = rnd.Next(10)
             });
             lstModel.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Germany",
+                DimensionOne = "June",
                 Quantity = rnd.Next(10)
             });
             var lstModel1 = new List<SimpleReportViewModel>();
             lstModel1.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Brazil",
+                DimensionOne = "July",
                 Quantity = rnd.Next(10)
             });
             lstModel1.Add(new SimpleReportViewModel
             {
-                DimensionOne = "USA",
+                DimensionOne = "Aug",
                 Quantity = rnd.Next(10)
             });
             lstModel1.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Portugal",
+                DimensionOne = "Sep",
                 Quantity = rnd.Next(10)
             });
             lstModel1.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Russia",
+                DimensionOne = "Oct",
                 Quantity = rnd.Next(10)
             });
             lstModel1.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Ireland",
+                DimensionOne = "Nov",
                 Quantity = rnd.Next(10)
             });
             lstModel1.Add(new SimpleReportViewModel
             {
-                DimensionOne = "Germany",
+                DimensionOne = "Dec",
                 Quantity = rnd.Next(10)
             });
             var t = new List<List<SimpleReportViewModel>>

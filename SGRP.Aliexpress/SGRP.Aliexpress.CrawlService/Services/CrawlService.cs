@@ -15,7 +15,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
     public class CrawlService : ICrawlService
     {
         private static readonly Random Random = new Random();
-        
+
 
         public List<CategoryViewModel> GetData(List<InputUrlModel> urls)
         {
@@ -31,9 +31,55 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
                 if (executeNodeResult.Count == 1)
                 {
-                    var rawData = JsonConvert.DeserializeObject<List<CategoryViewModel>>(executeNodeResult[0]);
-                    new DataResolverService(rawData).ResolveData(url);
-                    
+                    var rawData = JsonConvert.DeserializeObject<FirstPhaseDataModel>(executeNodeResult[0]);
+                    if (rawData.IsFirstPhase)
+                    {
+                        var urlDetails = rawData.FirstPhaseUrlModels;
+                        var totalItemCount = 0;
+                        var sendData = new List<FirstPhaseUrlModel>();
+                        foreach (var urlDetail in urlDetails)
+                        {
+                            if (totalItemCount > 3600)
+                            { 
+                                var categoryDataRaw = Node("nodescript.js",
+                                    "\"" + -110 + "\"" + " \"" + urlDetail.Url + "\"" + " \"" + url.Id + "\"" + " \"" + url.IsCategory + "\"" + " \"" +
+                                    GetRandomMailPass(Random) + "\"" + " \"" + JsonConvert.SerializeObject(sendData) + "\"", ref pid);
+
+                                var saveData = JsonConvert.DeserializeObject<List<CategoryViewModel>>(categoryDataRaw[1]);
+                                DataResolverContext.Init(saveData).ResolveData(url);
+
+                                 totalItemCount = 0;
+                                sendData = new List<FirstPhaseUrlModel>();
+                            }
+                            else
+                            {
+                                sendData.Add(
+                                    new FirstPhaseUrlModel
+                                    {
+                                        Min = urlDetail.Min,
+                                        Max = urlDetail.Max,
+                                        ResultCount = urlDetail.ResultCount,
+                                        Url = "'" + urlDetail.Url + "'"
+                                    }
+                                );
+                            }
+
+                            totalItemCount += urlDetail.ResultCount;
+                        }
+
+                        //var sampleUrl =
+                        //    "https://www.aliexpress.com/category/200002253/patches.html?trafficChannel=main&catName=patches&CatId=200002253&ltype=wholesale&SortType=default&page=1&isrefine=y";
+                        //var categoriesDataRaw = Node("nodescript.js",
+                        //    "\"" + -110 + "\"" + " \"" + sampleUrl + "\"" + " \"" + url.Id + "\"" + " \"" + url.IsCategory + "\"" + " \"" +
+                        //    GetRandomMailPass(Random) + " \"" + JsonConvert.SerializeObject(sendData) + "\"", ref pid);
+                        //var test1= JsonConvert.DeserializeObject<List<CategoryViewModel>>(categoriesDataRaw[0]);
+
+                    }
+                    //get items
+                    else
+                    {
+
+                    }
                 }
             }
 
@@ -167,13 +213,13 @@ namespace SGRP.Aliexpress.CrawlService.Services
         private static string GetRandomMailPass(Random rng)
         {
             var text = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-            var result = "intgrupic";
+            var result = "kuygrupic";
             for (var i = 0; i < 6; i++)
             {
                 result += GetRandomCharacter(text, rng);
             }
             result += rng.Next(0, 9) + rng.Next(1, 9) + GetRandomCharacter(text, rng);
-            result += "@gmail.com|" + "sgg120475104" + GetRandomCharacter(text, rng) + GetRandomCharacter(text, rng);
+            result += "@gmail.com|" + "ayuz8555104" + GetRandomCharacter(text, rng) + GetRandomCharacter(text, rng);
 
             return result;
         }

@@ -71,7 +71,7 @@ IF NOT EXISTS
 		StoreName NVARCHAR(MAX) NULL,
 		ProductName NVARCHAR(MAX) NOT NULL,
 		[Description] NVARCHAR(MAX) NULL,
-		BuyingPrice VARCHAR(200) NULL,
+		BuyingPrice DECIMAL(18,2) NULL,
 		ItemLot NVARCHAR(MAX) NULL,
 		BrandName NVARCHAR(MAX) NULL,
 		StockNumber BIGINT NULL,

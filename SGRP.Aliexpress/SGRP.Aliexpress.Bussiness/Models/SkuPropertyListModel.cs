@@ -20,6 +20,7 @@ namespace SGRP.Aliexpress.Bussiness.Models
 
         public long propertyValueId { get; set; }
 
+        public string skuPropertyImagePath { get; set; }
 
     }
 
@@ -34,6 +35,8 @@ namespace SGRP.Aliexpress.Bussiness.Models
     public class SkuVal
     {
         public string actSkuCalPrice { get; set; }
+
+        public decimal availQuantity { get; set; }
     }
 
 }

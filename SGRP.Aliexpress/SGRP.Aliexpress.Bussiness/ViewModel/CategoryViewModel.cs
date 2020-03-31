@@ -95,5 +95,8 @@ namespace SGRP.Aliexpress.Bussiness.ViewModel
 
         [JsonProperty(PropertyName = "specification4")]
         public string Specification4 { get; set; }
+
+        [JsonProperty(PropertyName = "specification5")]
+        public string Specification5 { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace SGRP.Aliexpress.Data.Entities
 
         public string Description { get; set; }
 
-        public string BuyingPrice { get; set; }
+        public decimal? BuyingPrice { get; set; }
 
         public string ItemLot { get; set; }
 
@@ -106,7 +106,7 @@ namespace SGRP.Aliexpress.Data.Entities
 
         public string ParentChild { get; set; }
 
-        public long ParentSku { get; set; }
+        public long? ParentSku { get; set; }
 
         public string RelationshipType { get; set; }
 

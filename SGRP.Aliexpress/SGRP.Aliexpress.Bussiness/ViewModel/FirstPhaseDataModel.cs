@@ -12,6 +12,12 @@ namespace SGRP.Aliexpress.Bussiness.ViewModel
 
         [JsonProperty(PropertyName = "data")]
         public List<FirstPhaseUrlModel> FirstPhaseUrlModels { get; set; }
+
+        [JsonProperty(PropertyName = "email")]
+        public string Email { get; set; }
+
+        [JsonProperty(PropertyName = "passWord")]
+        public string Password { get; set; }
     }
 
     public class FirstPhaseUrlModel

@@ -34,9 +34,11 @@ namespace SGRP.Aliexpress.Bussiness.Models
 
     public class SkuVal
     {
-        public string actSkuCalPrice { get; set; }
+        public decimal? actSkuCalPrice { get; set; }
 
         public decimal availQuantity { get; set; }
+
+        public decimal skuCalPrice { get; set; }
     }
 
 }

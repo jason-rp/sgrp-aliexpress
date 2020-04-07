@@ -24,7 +24,7 @@ namespace SGRP.Aliexpress.Data.Entities
 
         public string BrandName { get; set; }
 
-        public long StockNumber { get; set; }
+        public long? StockNumber { get; set; }
 
         public long? CategoryId { get; set; }
 
@@ -92,7 +92,7 @@ namespace SGRP.Aliexpress.Data.Entities
 
         public string OnTimeDelivery { get; set; }
 
-        public decimal TotalPrice { get; set; }
+        public decimal? TotalPrice { get; set; }
 
         public string Bullet1ST { get; set; }
 

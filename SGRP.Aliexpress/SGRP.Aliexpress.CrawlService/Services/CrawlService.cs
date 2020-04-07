@@ -26,61 +26,65 @@ namespace SGRP.Aliexpress.CrawlService.Services
             {
 
                 var executeNodeResult = Node("nodescript.js",
-                    "\"" + -101 + "\"" + " \"" + GetLoginUrl(url) + "\"" + " \"" + url.Id + "\"" + " \"" + url.IsCategory + "\""  + " \"" +
+                    "\"" + -101 + "\"" + " \"" + GetLoginUrl(url) + "\"" + " \"" + url.Id + "\"" + " \"" +
+                    url.IsCategory + "\"" + " \"" +
                     GetRandomMailPass(Random) + "\"", ref pid);
 
                 if (executeNodeResult.Count == 1)
                 {
-                    var rawData = JsonConvert.DeserializeObject<FirstPhaseDataModel>(executeNodeResult[0]);
-                    if (rawData.IsFirstPhase)
+                    if (url.IsCategory)
                     {
-                        var urlDetails = rawData.FirstPhaseUrlModels;
-                        var totalItemCount = 0;
-                        var sendData = new List<FirstPhaseUrlModel>();
-                        foreach (var urlDetail in urlDetails)
+                        var rawData = JsonConvert.DeserializeObject<FirstPhaseDataModel>(executeNodeResult[0]);
+                        if (rawData.IsFirstPhase)
                         {
-                            if (totalItemCount > 3600)
-                            { 
-                                var categoryDataRaw = Node("nodescript.js",
-                                    "\"" + -110 + "\"" + " \"" + urlDetail.Url + "\"" + " \"" + url.Id + "\"" + " \"" + url.IsCategory + "\"" + " \"" +
-                                    GetRandomMailPass(Random) + "\"" + " \"" + JsonConvert.SerializeObject(sendData) + "\"", ref pid);
-
-                                var saveData = JsonConvert.DeserializeObject<List<CategoryViewModel>>(categoryDataRaw[1]);
-                                DataResolverContext.Init(saveData).ResolveData(url);
-
-                                 totalItemCount = 0;
-                                sendData = new List<FirstPhaseUrlModel>();
-                            }
-                            else
+                            var urlDetails = rawData.FirstPhaseUrlModels;
+                            var totalItemCount = 0;
+                            var sendData = new List<FirstPhaseUrlModel>();
+                            foreach (var urlDetail in urlDetails)
                             {
-                                sendData.Add(
-                                    new FirstPhaseUrlModel
-                                    {
-                                        Min = urlDetail.Min,
-                                        Max = urlDetail.Max,
-                                        ResultCount = urlDetail.ResultCount,
-                                        Url = "'" + urlDetail.Url + "'"
-                                    }
-                                );
-                            }
+                                if (totalItemCount > 3600)
+                                {
+                                    var categoryDataRaw = Node("nodescript.js",
+                                        "\"" + -110 + "\"" + " \"" + urlDetail.Url + "\"" + " \"" + url.Id + "\"" +
+                                        " \"" + url.IsCategory + "\"" + " \"" +
+                                        GetRandomMailPass(Random) + "\"" + " \"" +
+                                        GetLoginUrl(url) + "\"" + " \"" + JsonConvert.SerializeObject(sendData) + "\"",
+                                        ref pid);
 
-                            totalItemCount += urlDetail.ResultCount;
+                                    
+                                    var saveData =
+                                        JsonConvert.DeserializeObject<List<CategoryViewModel>>(categoryDataRaw[1]);
+                                    DataResolverContext.Init(saveData).ResolveData(url);
+
+                                    totalItemCount = 0;
+                                    sendData = new List<FirstPhaseUrlModel>();
+                                }
+                                else
+                                {
+                                    sendData.Add(
+                                        new FirstPhaseUrlModel
+                                        {
+                                            Min = urlDetail.Min,
+                                            Max = urlDetail.Max,
+                                            ResultCount = urlDetail.ResultCount,
+                                            Url = "'" + urlDetail.Url + "'"
+                                        }
+                                    );
+                                }
+
+                                totalItemCount += urlDetail.ResultCount;
+                            }
                         }
 
-                        //var sampleUrl =
-                        //    "https://www.aliexpress.com/category/200002253/patches.html?trafficChannel=main&catName=patches&CatId=200002253&ltype=wholesale&SortType=default&page=1&isrefine=y";
-                        //var categoriesDataRaw = Node("nodescript.js",
-                        //    "\"" + -110 + "\"" + " \"" + sampleUrl + "\"" + " \"" + url.Id + "\"" + " \"" + url.IsCategory + "\"" + " \"" +
-                        //    GetRandomMailPass(Random) + " \"" + JsonConvert.SerializeObject(sendData) + "\"", ref pid);
-                        //var test1= JsonConvert.DeserializeObject<List<CategoryViewModel>>(categoriesDataRaw[0]);
-
                     }
-                    //get items
                     else
                     {
-
+                        var saveData =
+                            JsonConvert.DeserializeObject<List<CategoryViewModel>>(executeNodeResult[0]);
+                        DataResolverContext.Init(saveData).ResolveData(url);
                     }
                 }
+
             }
 
 
@@ -212,8 +216,8 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
         private static string GetRandomMailPass(Random rng)
         {
-            var text = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-            var result = "kuygrupic";
+            var text = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var result = "oiyufads";
             for (var i = 0; i < 6; i++)
             {
                 result += GetRandomCharacter(text, rng);

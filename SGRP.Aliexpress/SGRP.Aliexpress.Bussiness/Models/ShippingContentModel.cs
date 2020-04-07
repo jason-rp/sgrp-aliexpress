@@ -46,4 +46,22 @@ namespace SGRP.Aliexpress.Bussiness.Models
         [JsonProperty(PropertyName = "value")]
         public decimal Value { get; set; }
     }
+
+    public class VariationModel
+    {
+        public VariationEnums Id { get; set; }
+
+        public string Value { get; set; }
+        
+    }
+
+    public enum VariationEnums
+    {
+        Color = 1,
+        Size = 2,
+        ShipFrom = 3,
+        Other = 4,
+    }
+
+
 }

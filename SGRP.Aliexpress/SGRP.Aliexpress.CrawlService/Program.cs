@@ -49,7 +49,6 @@ namespace SGRP.Aliexpress.CrawlService
                                     {
                                         node.Kill();
                                     }
-                                    //Environment.Exit(0);
                                 }
                                 else
                                 {

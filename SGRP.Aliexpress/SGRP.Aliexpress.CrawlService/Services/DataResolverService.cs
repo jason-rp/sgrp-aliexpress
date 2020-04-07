@@ -38,19 +38,71 @@ namespace SGRP.Aliexpress.CrawlService.Services
                 var shipping3 = "";
                 var onTimeDelivery = 0;
                 var subTotalPrice = 0M;
-                var variationTheme = "";
                 var variationThemeFinal = string.Empty;
                 var variationColor = "";
                 var variationSize = "";
                 var variationPlus1 = "";
                 var variationPlus2 = "";
-                var description = viewModel.Description.Replace("&nbsp;", string.Empty).Replace("\n", string.Empty)
+                var variationShipFrom = "";
+
+                //var description = "";
+                //if (!string.IsNullOrEmpty(viewModel.Description) && description != "{}")
+                //{
+                //    var des = JsonConvert.DeserializeObject<List<string>>(viewModel.Description);
+                //    if (des.Any())
+                //    {
+                //        description = des.Aggregate(description, (current, d) => current + ("<p>" + d + "</p>"));
+
+                //        description = "<strong><p>Item Description: </p></strong>" + description +
+                //                      "<strong><p>Item Specification: </p></strong>";
+                //    }
+                //}
+
+                var description = viewModel.Description.Replace("&nbsp;", string.Empty).Replace("\\n", "<p></p>")
                     .Replace("<span>", "<p>").Replace("</span>", "</p>").Replace("\"", string.Empty)
-                    .Replace("\\n", string.Empty).Replace("\\t", string.Empty);
-                if (!description.Contains("<p>") || !description.Contains("<strong>"))
+                    .Replace("\\t", string.Empty);
+
+
+                var desSplits = description.Split(new string[] {"<p></p>"}, StringSplitOptions.None);
+                var desResult = new List<string>();
+                if (desSplits.Any())
                 {
-                    description = string.Empty;
+                    
+                    foreach (var desSplit in desSplits)
+                    {
+                        if (!string.IsNullOrWhiteSpace(desSplit))
+                        {
+                            if (desSplit.Contains("USD") || desSplit.Contains("$"))
+                            {
+                                if (desResult.Count > 1)
+                                {
+                                    desResult.RemoveAt(desResult.Count-1);
+                                }
+                            }
+                            else
+                            {
+                                desResult.Add(desSplit);
+                            }
+                        }   
+                    }
                 }
+
+                var finalDescription = "";
+
+                if (desResult.Any())
+                {
+                    foreach (var dr in desResult)
+                    {
+                        if (!dr.Contains("44894") && !dr.Contains("DIN912"))
+                        {
+                            finalDescription += "<p>" + dr + "</p>";
+                        }
+                    }
+                }
+
+
+                description = "<strong><p>Item Descripton: </p></strong>" + finalDescription +
+                              "<strong><p>Item Specification: </p></strong>";
 
                 var specificationHtml = "<p></p><strong>" + viewModel.SpecificationHtml + "</strong>";
 
@@ -141,6 +193,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                             category.CatSub3 = catPaths[i];
                         }
                     }
+
                 }
 
                 var product = new Product
@@ -168,7 +221,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                     OrderNumber = viewModel.OrderNumber,
                     ProcessingTime = string.Empty,
                     ShippingCompany = shippingCompany,
-                    ShippingFee = shippingFee > 0 ? shippingFee :  null,
+                    ShippingFee = shippingFee,
                     Shipping1ST = shipping1,
                     Shipping2ND = shipping2,
                     Shipping3RD = shipping3,
@@ -245,10 +298,8 @@ namespace SGRP.Aliexpress.CrawlService.Services
                                     ProductId = viewModel.ProductId,
                                     ProductKeyId = viewModel.ProductId + " - " + count,
                                     Description = description,
-                                    //BuyingPrice = viewModel.BuyingPrice,
                                     ItemLot = viewModel.ItemLot,
                                     BrandName = viewModel.BrandName,
-                                    //StockNumber = viewModel.StockNumber,
                                     CategoryId = inputUrlModel.IsCategory ? inputUrlModel.Id : (long?)null,
                                     CategoryName = viewModel.CategoryName,
                                     StoreId = viewModel.StoreId,
@@ -277,128 +328,204 @@ namespace SGRP.Aliexpress.CrawlService.Services
                                 };
 
 
-                                var ids = price.skuPropIds.Split(",");
+                                var ids = price.skuPropIds.Split(",").Select(int.Parse).ToList();
                                 var childName = " - ( ";
                                 var bullet1 = "NOTE - You are Choosing: \"";
                                 var imgChild = "";
-
                                 var shippingFrom = "";
+                                var variations = new List<VariationModel>();
 
-                                foreach (var id in ids)
+                                if (ids.Any())
                                 {
-                                    var currentProp = skuProps.Where(n =>
-                                            n.SkuPropertyValues.Select(i => i.propertyValueId.ToString()).Contains(id))
-                                        .ToList();
 
-                                    if (currentProp.Any())
+                                    if (ids.Count == 1)
                                     {
-                                        if (imgChild == "")
-                                        {
-                                            imgChild = currentProp.First().SkuPropertyValues.First(n =>
-                                                n.propertyValueId.ToString() == id).skuPropertyImagePath;
-                                        }
-                                        
+                                        var currentProp = skuProps.FirstOrDefault(n =>
+                                            n.SkuPropertyValues.Any(i => i.propertyValueId == ids[0]));
 
+                                        if (currentProp != null)
+                                        {
+                                            var displayName = currentProp.SkuPropertyValues.First(n => n.propertyValueId == ids[0]).propertyValueDisplayName;
+                                            if (currentProp.SkuPropertyName.Contains("Color"))
+                                            {
+                                                variationThemeFinal = "Color";
+                                                variations.Add(new VariationModel
+                                                {
+                                                    Id = VariationEnums.Color,
+                                                    Value = displayName
+                                                });
+                                            }
+                                            else
+                                            {
+                                                variationThemeFinal = "SizeName";
+                                                variations.Add(new VariationModel
+                                                {
+                                                    Id = VariationEnums.Size,
+                                                    Value = displayName
+                                                });
+                                            }
+                                        }
+
+                                        //get child name
                                         if (childName == " - ( ")
                                         {
-                                            childName += currentProp.First().SkuPropertyName + ": " +
-                                                         currentProp.First().SkuPropertyValues.First(n =>
-                                                                 n.propertyValueId.ToString() == id)
-                                                             .propertyValueDisplayName;
+                                            childName +=
+                                                currentProp.SkuPropertyName + ": " + currentProp.SkuPropertyValues
+                                                    .First(n => n.propertyValueId == ids[0]).propertyValueDisplayName;
                                         }
                                         else
                                         {
                                             childName +=
-                                                ", " + currentProp.First().SkuPropertyName + ": " + currentProp.First().SkuPropertyValues
-                                                    .First(n => n.propertyValueId.ToString() == id)
-                                                    .propertyValueDisplayName;
+                                                ", " + currentProp.SkuPropertyName + ": " + currentProp.SkuPropertyValues
+                                                    .First(n => n.propertyValueId == ids[0]).propertyValueDisplayName;
                                         }
-
+                                        //get bullet 1
                                         if (bullet1 == "NOTE - You are Choosing: \"")
                                         {
-                                            bullet1 += currentProp.First().SkuPropertyName + ": " + currentProp.First().SkuPropertyValues
-                                                .First(n => n.propertyValueId.ToString() == id)
+                                            bullet1 += currentProp.SkuPropertyName + ": " + currentProp.SkuPropertyValues
+                                                .First(n => n.propertyValueId == ids[0])
                                                 .propertyValueDisplayName;
                                         }
                                         else
                                         {
-                                            bullet1 += ", " + currentProp.First().SkuPropertyName + ": "  + currentProp.First().SkuPropertyValues
-                                                .First(n => n.propertyValueId.ToString() == id)
+                                            bullet1 += ", " + currentProp.SkuPropertyName + ": " + currentProp.SkuPropertyValues
+                                                .First(n => n.propertyValueId == ids[0])
                                                 .propertyValueDisplayName;
                                         }
 
-                                        if (currentProp.Any(n => n.SkuPropertyName.Contains("Color")))
+                                        var img1 = currentProp.SkuPropertyValues.Where(n =>
+                                            !string.IsNullOrEmpty(n.skuPropertyImagePath) && n.propertyValueId == ids[0]).ToList();
+                                        if (img1.Any())
                                         {
-                                            variationTheme += "Color";
-                                            variationColor = currentProp.First().SkuPropertyValues
-                                                .First(n => n.propertyValueId.ToString() == id)
-                                                .propertyValueDisplayName;
-                                        }
-                                        else if (currentProp.Any(n => n.SkuPropertyName.Contains("Size")))
-                                        {
-                                            variationTheme += " SizeName";
-                                            variationSize = currentProp.First().SkuPropertyValues
-                                                .First(n => n.propertyValueId.ToString() == id)
-                                                .propertyValueDisplayName;
-                                        }
-                                        else if (!string.IsNullOrEmpty(variationColor) &&
-                                                 !string.IsNullOrEmpty(variationSize))
-                                        {
-                                            variationPlus1 = currentProp.First().SkuPropertyValues
-                                                .First(n => n.propertyValueId.ToString() == id)
-                                                .propertyValueDisplayName;
-                                        }
-                                        else if (!string.IsNullOrEmpty(variationColor) &&
-                                                 !string.IsNullOrEmpty(variationSize) &&
-                                                 !string.IsNullOrEmpty(variationPlus1))
-                                        {
-                                            variationPlus2 = currentProp.First().SkuPropertyValues
-                                                .First(n => n.propertyValueId.ToString() == id)
-                                                .propertyValueDisplayName;
-                                        }
-                                        else if (currentProp.Any(n => n.SkuPropertyName.Contains("Ships From")))
-                                        {
-                                            shippingFrom += currentProp.First().SkuPropertyValues
-                                                .First(n => n.propertyValueId.ToString() == id)
-                                                .propertyValueDisplayName + " , ";
+                                            imgChild = img1.First().skuPropertyImagePath;
                                         }
                                     }
-
-                                }
-
-                                if (!string.IsNullOrEmpty(variationTheme))
-                                {
-                                    if (variationTheme.Contains("Color") && variationTheme.Contains("SizeName"))
+                                    else
                                     {
                                         variationThemeFinal = "SizeName-ColorName";
+                                        foreach (var id in ids)
+                                        {
+                                            var currentProp = skuProps.FirstOrDefault(n =>
+                                                n.SkuPropertyValues.Any(i => i.propertyValueId == id));
+                                            if (currentProp == null) continue;
+                                            var displayName = currentProp.SkuPropertyValues.First(n => n.propertyValueId == id).propertyValueDisplayName;
+                                            if (currentProp.SkuPropertyName.Contains("Color"))
+                                            {
+                                                variations.Add(new VariationModel
+                                                {
+                                                    Id = VariationEnums.Color,
+                                                    Value = displayName
+                                                });
+                                            }
+                                            else if (currentProp.SkuPropertyName.Contains("SizeName"))
+                                            {
+                                                variations.Add(new VariationModel
+                                                {
+                                                    Id = VariationEnums.Size,
+                                                    Value = displayName
+                                                });
+                                            }
+                                            else if (currentProp.SkuPropertyName.Contains("Ships From"))
+                                            {
+                                                variations.Add(new VariationModel
+                                                {
+                                                    Id = VariationEnums.ShipFrom,
+                                                    Value = displayName
+                                                });
+                                            }
+                                            else
+                                            {
+                                                variations.Add(new VariationModel
+                                                {
+                                                    Id = VariationEnums.Other,
+                                                    Value = displayName
+                                                });
+                                            }
+
+                                            //get child name
+                                            if (childName == " - ( ")
+                                            {
+                                                childName +=
+                                                    currentProp.SkuPropertyName + ": " + currentProp.SkuPropertyValues
+                                                        .First(n => n.propertyValueId == id).propertyValueDisplayName;
+                                            }
+                                            else
+                                            {
+                                                childName +=
+                                                    ", " + currentProp.SkuPropertyName + ": " + currentProp.SkuPropertyValues
+                                                        .First(n => n.propertyValueId == id).propertyValueDisplayName;
+                                            }
+                                            //get bullet 1
+                                            if (bullet1 == "NOTE - You are Choosing: \"")
+                                            {
+                                                bullet1 += currentProp.SkuPropertyName + ": " + currentProp.SkuPropertyValues
+                                                    .First(n => n.propertyValueId == id)
+                                                    .propertyValueDisplayName;
+                                            }
+                                            else
+                                            {
+                                                bullet1 += ", " + currentProp.SkuPropertyName + ": " + currentProp.SkuPropertyValues
+                                                    .First(n => n.propertyValueId == id)
+                                                    .propertyValueDisplayName;
+                                            }
+
+                                            var img1 = currentProp.SkuPropertyValues.Where(n =>
+                                                !string.IsNullOrEmpty(n.skuPropertyImagePath) && n.propertyValueId == id).ToList();
+                                            if (img1.Any())
+                                            {
+                                                imgChild = img1.First().skuPropertyImagePath;
+                                            }
+                                        }
                                     }
-                                    else if (variationTheme.Contains("Color") && !variationTheme.Contains("SizeName"))
+
+                                    variationColor = variations.Any(n => n.Id == VariationEnums.Color)
+                                        ? variations.First(n => n.Id == VariationEnums.Color).Value
+                                        : "";
+                                    variationSize = variations.Any(n => n.Id == VariationEnums.Size)
+                                        ? variations.First(n => n.Id == VariationEnums.Size).Value
+                                        : "";
+                                    variationShipFrom = variations.Any(n => n.Id == VariationEnums.ShipFrom)
+                                        ? variations.First(n => n.Id == VariationEnums.ShipFrom).Value
+                                        : "";
+
+                                    foreach (var variation in variations.Where(n=>n.Id == VariationEnums.Other || n.Id == VariationEnums.ShipFrom))
                                     {
-                                        variationThemeFinal = "Color";
+                                        if (string.IsNullOrEmpty(variationColor))
+                                        {
+                                            variationColor = variation.Value;
+                                        }
+                                        else if (string.IsNullOrEmpty(variationSize))
+                                        {
+                                            variationSize = variation.Value;
+                                        }
+                                        else if (string.IsNullOrEmpty(variationPlus1))
+                                        {
+                                            variationPlus1 = variation.Value;
+                                        }
+                                        else if (string.IsNullOrEmpty(variationPlus2))
+                                        {
+                                            variationPlus2 = variation.Value;
+                                        }
                                     }
-                                    else if (!variationTheme.Contains("Color") && variationTheme.Contains("SizeName"))
-                                    {
-                                        variationThemeFinal = "SizeName";
-                                    }
+
                                 }
-
-
 
                                 bullet1 += " \", Price for this selection only not for all.";
                                 childName += " )";
 
-                                var shipping1StValue = !string.IsNullOrEmpty(product.Shipping1ST)
-                                    ? Convert.ToDecimal((product.Shipping1ST.Split("|"))[1])
-                                    : 0;
 
-                                productChild.BuyingPrice = Convert.ToDecimal(price.skuVal.actSkuCalPrice);
-                                productChild.TotalPrice = Convert.ToDecimal(price.skuVal.actSkuCalPrice) + subTotalPrice;
+                                productChild.BuyingPrice = price.skuVal.actSkuCalPrice.HasValue
+                                    ? Convert.ToDecimal(price.skuVal.actSkuCalPrice.Value)
+                                    : Convert.ToDecimal(price.skuVal.skuCalPrice);
+
+                                productChild.TotalPrice = Convert.ToDecimal(price.skuVal.actSkuCalPrice.HasValue
+                                    ? Convert.ToDecimal(price.skuVal.actSkuCalPrice.Value)
+                                    : Convert.ToDecimal(price.skuVal.skuCalPrice)) + subTotalPrice;
 
                                 productChild.StockNumber = Convert.ToInt64(price.skuVal.availQuantity);
 
 
                                 productChild.ProductName = product.ProductName + childName;
-                               // productChild.BuyingPrice = Convert.ToDecimal(price.skuVal.actSkuCalPrice);
                                 productChild.Bullet1ST = bullet1;
                                 productChild.ParentSku = product.ProductId;
                                 productChild.RelationshipType = "Variation";
@@ -408,17 +535,28 @@ namespace SGRP.Aliexpress.CrawlService.Services
                                 productChild.VariationSize = variationSize;
                                 productChild.VariationPlus1ST = variationPlus1;
                                 productChild.VariationPlus2ND = variationPlus2;
-                                productChild.Image1ST = imgChild;
+                                productChild.VariationShippingFrom = variationShipFrom;
 
-                                variationTheme = "";
-                                variationThemeFinal = string.Empty;
+                                productChild.Image1ST = !string.IsNullOrEmpty(imgChild) ? imgChild : product.Image1ST;
+                                productChild.Image2ND =
+                                    !string.IsNullOrEmpty(imgChild) ? product.Image1ST : product.Image2ND;
+                                productChild.Image3RD =
+                                    !string.IsNullOrEmpty(imgChild) ? product.Image2ND : product.Image3RD;
+                                productChild.Image4TH =
+                                    !string.IsNullOrEmpty(imgChild) ? product.Image3RD : product.Image4TH;
+                                productChild.Image5TH =
+                                    !string.IsNullOrEmpty(imgChild) ? product.Image4TH : product.Image5TH;
+                                productChild.Image6TH =
+                                    !string.IsNullOrEmpty(imgChild) ? product.Image5TH : product.Image6TH;
+                                productChild.Image7TH =
+                                    !string.IsNullOrEmpty(imgChild) ? product.Image6TH : product.Image7TH;
+
+                                
                                 variationColor = "";
                                 variationSize = "";
                                 variationPlus1 = "";
                                 variationPlus2 = "";
-
-                                
-                                AddImageToProduct(viewModel, productChild);
+                                variationShipFrom = "";
 
                                 products.Add(productChild);
                                 count += 1;
@@ -428,25 +566,27 @@ namespace SGRP.Aliexpress.CrawlService.Services
                     }
                     else
                     {
-                        //single product
-
+                        product.IsParent = false;
+                        product.ParentChild = "";
+                        product.ProductKeyId = viewModel.ProductId.ToString();
+                        product.BuyingPrice = Convert.ToDecimal(prices[0].skuVal.actSkuCalPrice ?? prices[0].skuVal.skuCalPrice);
+                        product.TotalPrice = Convert.ToDecimal(prices[0].skuVal.actSkuCalPrice ?? prices[0].skuVal.skuCalPrice) + subTotalPrice;
+                        product.Image1ST = viewModel.ImagePatchList;
                     }
-
-
-
                 }
 
-                product.VariationTheme = variationThemeFinal;
+                product.VariationTheme = product.IsParent == false ? null : variationThemeFinal;
+                product.StockNumber = product.IsParent == false ? product.StockNumber : null;
                 product.ParentSku = null;
+                product.TotalPrice = product.IsParent == false ? product.TotalPrice : null;
                 products.Add(product);
             }
 
             using (var context = new DesignTimeDbContextFactory().CreateDbContext())
             {
+                context.CategoryPaths.Update(category);
 
-                context.CategoryPaths.Add(category);
-
-                context.ProductParents.AddRange(products.Where(n => n.IsParent != null && n.IsParent == true).Select(
+                context.ProductParents.UpdateRange(products.Where(n => n.IsParent != null).Select(
                     n => new ProductParent
                     {
                         ProductId = n.ProductId

@@ -4,8 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
+using log4net;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using SGRP.Aliexpress.Bussiness.Models;
@@ -18,19 +21,18 @@ namespace SGRP.Aliexpress.CrawlService
     class Program
     {
         private static ICrawlService _crawlService = new Services.CrawlService();
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Program));
         static void Main(string[] args)
         {
+            var log4netConfig = new XmlDocument();
+            log4netConfig.Load(File.OpenRead("log4net.config"));
+            var repo = log4net.LogManager.CreateRepository(Assembly.GetEntryAssembly(),
+                typeof(log4net.Repository.Hierarchy.Hierarchy));
+            log4net.Config.XmlConfigurator.Configure(repo, log4netConfig["log4net"]);
+
             var connection = RedisConnectionFactory.GetConnection();
 
-            //var data = _crawlService.GetData(new List<InputUrlModel>
-            //{
-            //    new InputUrlModel
-            //    {
-            //        Url = $"https://www.aliexpress.com/category/200002253/patches.html?trafficChannel=main&catName=patches&CatId=200002253&ltype=wholesale&SortType=default&page=1&isrefine=y"
-            //    }
-
-            //}).ToList();
-
+            _log.InfoFormat("Start Program!!");
             var data = new List<string>();
             _ = Task.Factory.StartNew(async () =>
             {
@@ -39,7 +41,7 @@ namespace SGRP.Aliexpress.CrawlService
                     try
                     {
                         RedisMessageModel currents;
-                         connection.GetSubscriber().Subscribe("redis::runNode", (c, v) =>
+                        connection.GetSubscriber().Subscribe("redis::runNode", (c, v) =>
                         {
                             if (!string.IsNullOrEmpty(v))
                             {
@@ -53,7 +55,6 @@ namespace SGRP.Aliexpress.CrawlService
                                 else
                                 {
                                     currents = JsonConvert.DeserializeObject<RedisMessageModel>(v);
-
                                     if (currents.IsRun)
                                     {
                                         var signalRKeyId = 1;
@@ -61,17 +62,25 @@ namespace SGRP.Aliexpress.CrawlService
                                         {
                                             if (data.Count(n => n == url) < 1 || !data.Any())
                                             {
-                                                var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
+                                                try
                                                 {
-                                                    new InputUrlModel
+                                                    var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
                                                     {
-                                                        Url = url,
-                                                        SignalRKeyId = signalRKeyId
-                                                    }
+                                                        new InputUrlModel
+                                                        {
+                                                            Url = url,
+                                                            SignalRKeyId = signalRKeyId
+                                                        }
 
-                                                }).ToList();
-                                                data.Add(url);
-                                                signalRKeyId += 1;
+                                                    }).ToList();
+                                                    data.Add(url);
+                                                    signalRKeyId += 1;
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    _log.Error(ex);
+                                                }
+
                                             }
                                         }
                                     }
@@ -88,7 +97,7 @@ namespace SGRP.Aliexpress.CrawlService
                     }
                     catch (Exception ex)
                     {
-                        var t = ex;
+                        _log.Error(ex);
                     }
                 }
             });

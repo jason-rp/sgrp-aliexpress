@@ -15,7 +15,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
     public class DataResolverService
     {
         private readonly List<CategoryViewModel> _viewModel;
-
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(DataResolverService));
         public DataResolverService(List<CategoryViewModel> rawData)
         {
             _viewModel = rawData;
@@ -584,18 +584,29 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
             using (var context = new DesignTimeDbContextFactory().CreateDbContext())
             {
-                context.CategoryPaths.Update(category);
+                _log.InfoFormat("before saved:" );
+                try
+                {
+                    _log.Info("cat: " + category.CatMain);
+                    context.CategoryPaths.Add(category);
 
-                context.ProductParents.UpdateRange(products.Where(n => n.IsParent != null).Select(
-                    n => new ProductParent
-                    {
-                        ProductId = n.ProductId
-                    }));
+                    _log.Info("products: " + products.Count);
+                    context.ProductParents.AddRange(products.Where(n => n.IsParent != null).Select(
+                        n => new ProductParent
+                        {
+                            ProductId = n.ProductId
+                        }));
 
 
-                context.Products.UpdateRange(products);
+                    context.Products.AddRange(products);
 
-                context.SaveChanges();
+                    context.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    _log.Error("DB error: " + ex);
+                }
+                
 
                 RedisConnectionFactory.GetConnection().GetSubscriber().PublishAsync("redis::singleCount-" + inputUrlModel.SignalRKeyId, products.Count);
 

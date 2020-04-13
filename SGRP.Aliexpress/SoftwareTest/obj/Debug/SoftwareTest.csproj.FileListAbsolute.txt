@@ -1,0 +1,6 @@
+H:\aliexpress\SGRP.Aliexpress\SoftwareTest\bin\Debug\SoftwareTest.exe.config
+H:\aliexpress\SGRP.Aliexpress\SoftwareTest\bin\Debug\SoftwareTest.exe
+H:\aliexpress\SGRP.Aliexpress\SoftwareTest\bin\Debug\SoftwareTest.pdb
+H:\aliexpress\SGRP.Aliexpress\SoftwareTest\obj\Debug\SoftwareTest.csprojAssemblyReference.cache
+H:\aliexpress\SGRP.Aliexpress\SoftwareTest\obj\Debug\SoftwareTest.exe
+H:\aliexpress\SGRP.Aliexpress\SoftwareTest\obj\Debug\SoftwareTest.pdb

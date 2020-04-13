@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -15,77 +16,93 @@ namespace SGRP.Aliexpress.CrawlService.Services
     public class CrawlService : ICrawlService
     {
         private static readonly Random Random = new Random();
-
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(CrawlService));
 
         public List<CategoryViewModel> GetData(List<InputUrlModel> urls)
         {
+            _log.InfoFormat("Start GetData!!");
             var pid = 1;
             var result = new List<CategoryViewModel>();
-
-            foreach (var url in urls)
+            try
             {
-
-                var executeNodeResult = Node("nodescript.js",
-                    "\"" + -101 + "\"" + " \"" + GetLoginUrl(url) + "\"" + " \"" + url.Id + "\"" + " \"" +
-                    url.IsCategory + "\"" + " \"" +
-                    GetRandomMailPass(Random) + "\"", ref pid);
-
-                if (executeNodeResult.Count == 1)
+                foreach (var url in urls)
                 {
-                    if (url.IsCategory)
+
+                    var executeNodeResult = Node("nodescript.js",
+                        "\"" + -101 + "\"" + " \"" + GetLoginUrl(url) + "\"" + " \"" + url.Id + "\"" + " \"" +
+                        url.IsCategory + "\"" + " \"" +
+                        GetRandomMailPass(Random) + "\"", ref pid);
+                    if (executeNodeResult.Count == 1)
                     {
-                        var rawData = JsonConvert.DeserializeObject<FirstPhaseDataModel>(executeNodeResult[0]);
-                        if (rawData.IsFirstPhase)
+                        if (url.IsCategory)
                         {
-                            var urlDetails = rawData.FirstPhaseUrlModels;
-                            var totalItemCount = 0;
-                            var sendData = new List<FirstPhaseUrlModel>();
-                            foreach (var urlDetail in urlDetails)
+                            var rawData = JsonConvert.DeserializeObject<FirstPhaseDataModel>(executeNodeResult[0]);
+                            _log.InfoFormat("vo 1: " + rawData.Email);
+                            if (rawData.IsFirstPhase)
                             {
-                                if (totalItemCount > 3600)
+                                var urlDetails = rawData.FirstPhaseUrlModels;
+                                var totalItemCount = 0;
+                                var sendData = new List<FirstPhaseUrlModel>();
+                                if(urlDetails == null) continue;
+                                foreach (var urlDetail in urlDetails)
                                 {
-                                    var categoryDataRaw = Node("nodescript.js",
-                                        "\"" + -110 + "\"" + " \"" + urlDetail.Url + "\"" + " \"" + url.Id + "\"" +
-                                        " \"" + url.IsCategory + "\"" + " \"" +
-                                        GetRandomMailPass(Random) + "\"" + " \"" +
-                                        GetLoginUrl(url) + "\"" + " \"" + JsonConvert.SerializeObject(sendData) + "\"",
-                                        ref pid);
+                                    _log.InfoFormat("vo 2: ");
+                                    if (totalItemCount > 3600)
+                                    {
 
-                                    
-                                    var saveData =
-                                        JsonConvert.DeserializeObject<List<CategoryViewModel>>(categoryDataRaw[1]);
-                                    DataResolverContext.Init(saveData).ResolveData(url);
+                                        var categoryDataRaw = Node("nodescript.js",
+                                            "\"" + -110 + "\"" + " \"" + urlDetail.Url + "\"" + " \"" + url.Id + "\"" +
+                                            " \"" + url.IsCategory + "\"" + " \"" +
+                                            GetRandomMailPass(Random) + "\"" + " \"" +
+                                            GetLoginUrl(url) + "\"" + " \"" + JsonConvert.SerializeObject(sendData) + "\"",
+                                            ref pid);
+                                        
+                                       _log.Info("qua luon 0 ::::" + categoryDataRaw.Count + '"' +  categoryDataRaw[0] + '"');
+                                       _log.Info("qua luon 1 ::::" + categoryDataRaw.Count + '"' + categoryDataRaw[1] + '"');
+                                       if (categoryDataRaw.Count == 3)
+                                       {
+                                           _log.Info("qua luon 2 ::::" + categoryDataRaw.Count + '"' + categoryDataRaw[2] + '"');
+                                       }
+                                        var saveData =
+                                            JsonConvert.DeserializeObject<List<CategoryViewModel>>(categoryDataRaw[1]);
+                                        DataResolverContext.Init(saveData).ResolveData(url);
 
-                                    totalItemCount = 0;
-                                    sendData = new List<FirstPhaseUrlModel>();
+                                        totalItemCount = 0;
+                                        sendData = new List<FirstPhaseUrlModel>();
+                                    }
+                                    else
+                                    {
+                                        sendData.Add(
+                                            new FirstPhaseUrlModel
+                                            {
+                                                Min = urlDetail.Min,
+                                                Max = urlDetail.Max,
+                                                ResultCount = urlDetail.ResultCount,
+                                                Url = "'" + urlDetail.Url + "'"
+                                            }
+                                        );
+                                    }
+
+                                    totalItemCount += urlDetail.ResultCount;
                                 }
-                                else
-                                {
-                                    sendData.Add(
-                                        new FirstPhaseUrlModel
-                                        {
-                                            Min = urlDetail.Min,
-                                            Max = urlDetail.Max,
-                                            ResultCount = urlDetail.ResultCount,
-                                            Url = "'" + urlDetail.Url + "'"
-                                        }
-                                    );
-                                }
-
-                                totalItemCount += urlDetail.ResultCount;
                             }
+
                         }
+                        else
+                        {
+                            var saveData =
+                                JsonConvert.DeserializeObject<List<CategoryViewModel>>(executeNodeResult[0]);
+                            DataResolverContext.Init(saveData).ResolveData(url);
+                        }
+                    }
 
-                    }
-                    else
-                    {
-                        var saveData =
-                            JsonConvert.DeserializeObject<List<CategoryViewModel>>(executeNodeResult[0]);
-                        DataResolverContext.Init(saveData).ResolveData(url);
-                    }
                 }
-
             }
+            catch (Exception ex)
+            {
+                _log.Error(ex);
+            }
+            
 
 
             return result;

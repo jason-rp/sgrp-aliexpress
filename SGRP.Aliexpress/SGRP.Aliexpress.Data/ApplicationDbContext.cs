@@ -10,10 +10,11 @@ namespace SGRP.Aliexpress.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
 
-
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductParent> ProductParents { get; set; }
         public DbSet<CategoryPath> CategoryPaths { get; set; }
+
+        public DbSet<Admin> Admins { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -22,6 +23,7 @@ namespace SGRP.Aliexpress.Data
             builder.Entity<Product>().ToTable("Product");
             builder.Entity<ProductParent>().ToTable("ProductParent");
             builder.Entity<CategoryPath>().ToTable("CategoryPath");
+            builder.Entity<Admin>().ToTable("Admin");
         }
 
     }

@@ -23,6 +23,7 @@ namespace SGRP.Aliexpress.Web.Controllers
         private readonly ApplicationDbContext _context;
 
         private readonly AliexpressHub _aliexpressHub;
+        //private ApplicationDbContext _context = new DesignTimeDbContextFactory().CreateDbContext()
 
         public HomeController(ApplicationDbContext context, AliexpressHub aliexpressHub)
         {
@@ -91,8 +92,10 @@ namespace SGRP.Aliexpress.Web.Controllers
                       }
                   }
               });
+
             return View();
         }
+
 
 
         public IActionResult Privacy()
@@ -105,5 +108,7 @@ namespace SGRP.Aliexpress.Web.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
     }
 }

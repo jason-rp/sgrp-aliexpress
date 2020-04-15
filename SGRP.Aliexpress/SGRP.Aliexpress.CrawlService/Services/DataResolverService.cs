@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using HtmlAgilityPack;
 using Newtonsoft.Json;
 using SGRP.Aliexpress.Bussiness.Models;
 using SGRP.Aliexpress.Bussiness.ViewModel;
@@ -45,22 +47,10 @@ namespace SGRP.Aliexpress.CrawlService.Services
                 var variationPlus2 = "";
                 var variationShipFrom = "";
 
-                //var description = "";
-                //if (!string.IsNullOrEmpty(viewModel.Description) && description != "{}")
-                //{
-                //    var des = JsonConvert.DeserializeObject<List<string>>(viewModel.Description);
-                //    if (des.Any())
-                //    {
-                //        description = des.Aggregate(description, (current, d) => current + ("<p>" + d + "</p>"));
-
-                //        description = "<strong><p>Item Description: </p></strong>" + description +
-                //                      "<strong><p>Item Specification: </p></strong>";
-                //    }
-                //}
 
                 var description = viewModel.Description.Replace("&nbsp;", string.Empty).Replace("\\n", "<p></p>")
                     .Replace("<span>", "<p>").Replace("</span>", "</p>").Replace("\"", string.Empty)
-                    .Replace("\\t", string.Empty);
+                    .Replace("\\t", string.Empty).Replace("::span::", "<p>");
 
 
                 var desSplits = description.Split(new string[] {"<p></p>"}, StringSplitOptions.None);
@@ -328,6 +318,20 @@ namespace SGRP.Aliexpress.CrawlService.Services
                                 };
 
 
+                                //get processTime
+                                var processTime = 0;
+                                try
+                                {
+                                    processTime = GetProcessTime(productChild.ProductId);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _log.Error("Error: ",ex);
+                                    continue;
+                                }
+
+                                productChild.ProcessingTime = processTime.ToString();
+
                                 var ids = price.skuPropIds.Split(",").Select(int.Parse).ToList();
                                 var childName = " - ( ";
                                 var bullet1 = "NOTE - You are Choosing: \"";
@@ -566,6 +570,18 @@ namespace SGRP.Aliexpress.CrawlService.Services
                     }
                     else
                     {
+                        var processTime = 0;
+                        try
+                        {
+                            processTime = GetProcessTime(product.ProductId);
+                        }
+                        catch (Exception ex)
+                        {
+                            _log.Error("Error: ", ex);
+                            continue;
+                        }
+
+                        product.ProcessingTime = processTime.ToString();
                         product.IsParent = false;
                         product.ParentChild = "";
                         product.ProductKeyId = viewModel.ProductId.ToString();
@@ -653,6 +669,39 @@ namespace SGRP.Aliexpress.CrawlService.Services
                     }
                 }
             }
+        }
+
+        public int GetProcessTime(long productId)
+        {
+            var result = 0;
+            if (productId <= 0) return result;
+            var url =
+                $"https://freight.aliexpress.com/ajaxFreightCalculateService.htm?productid={productId}&country=US";
+            var clientHandler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            };
+            using (var client = new HttpClient(clientHandler))
+            {
+
+                using (var response = client.GetAsync(url).Result)
+                {
+                    using (var content = response.Content)
+                    {
+                        var ctx = content.ReadAsStringAsync().Result;
+                        if (string.IsNullOrEmpty(ctx)) return result;
+                        var obj = ctx.Substring(1, ctx.Length - 2);
+                        var jsonConvert = JsonConvert.DeserializeObject<ProcessingTimeModel>(obj);
+                        if (jsonConvert != null && jsonConvert.ProcessingTimes.Any())
+                        {
+                            result = jsonConvert.ProcessingTimes[0].processingTime;
+                        }
+                    }
+                }
+            }
+
+
+            return result;
         }
     }
 }

@@ -27,39 +27,139 @@ let __randomString = function (length) {
     return result;
 }
 
-async function AutoSlide(page, url) {
-    var counter = 0;
+async function AutoSlide(page, url, isFirstPhase) {
     let redifineCategory = await page.evaluate(() => {
         return window.runParams;
     });
     await __Set_TOut(2000);
     if (redifineCategory === undefined) {
-        while (counter <= 5) {
-            await page.goto(url, { waitUntil: 'domcontentloaded' });
-            let runParams = await page.evaluate(() => {
-                return window.runParams;
-            });
-            await __Set_TOut(2000);
-            if (runParams === undefined) {
-                await page.waitForSelector('.nc_iconfont.btn_slide');
-                let sliderElement = await page.$('.slidetounlock');
-                let slider = await sliderElement.boundingBox();
+        if (isFirstPhase == true) {
+            let [__Username] = await page.$x('//*[@id="fm-login-id"]');
+            if (__Username) {
+                await __Username.click();
+                await page.type('#fm-login-id', "rupicmax@gmail.com", { delay: 20 });
 
-                let slideHandle = await page.$('.nc_iconfont.btn_slide');
-                let handle = await slideHandle.boundingBox();
+                let [__Pwd] = await page.$x('//*[@id="fm-login-password"]');
+                if (__Pwd) {
+                    await __Pwd.click();
+                }
+                await page.type('#fm-login-password', "leminhtam1041989", { delay: 20 });
 
-                await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
-                await page.mouse.down();
-                await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
-                await page.mouse.up();
-                await __Set_TOut(3000);
+                let [__Signin] = await page.$x('//*[@id="login-form"]/div[5]/button');
+                if (__Signin) {
+                    await __Signin.click();
+                }
+
+                await __Set_TOut(5000);
+
+                let redifineCategory1 = await page.evaluate(() => {
+                    return window.runParams;
+                });
+                if (redifineCategory1 === undefined) {
+                    let isRun = true;
+                    while (isRun == true) {
+                        await page.goto(url, { waitUntil: 'domcontentloaded' });
+                        let runParams = await page.evaluate(() => {
+                            return window.runParams;
+                        });
+                        await __Set_TOut(2000);
+                        if (runParams === undefined) {
+                            await page.waitForSelector('.nc_iconfont.btn_slide');
+                            let sliderElement = await page.$('.slidetounlock');
+                            let slider = await sliderElement.boundingBox();
+
+                            let slideHandle = await page.$('.nc_iconfont.btn_slide');
+                            let handle = await slideHandle.boundingBox();
+
+                            await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+                            await page.mouse.down();
+                            await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
+                            await page.mouse.up();
+                            await __Set_TOut(3000);
+                        }
+                        delete runParams;
+
+                        let isRunAgain = await page.evaluate(() => {
+                            return window.runParams;
+                        });
+
+                        if (isRunAgain !== undefined) {
+                            isRun = false;
+                        }
+                        delete isRunAgain;
+                    }
+                    delete redifineCategory1;
+                }
             }
-            delete runParams;
-            counter++;
-        }
-    }
-    delete redifineCategory;
+            else {
+                let isRun = true;
+                while (isRun == true) {
+                    await page.goto(url, { waitUntil: 'domcontentloaded' });
+                    let runParams = await page.evaluate(() => {
+                        return window.runParams;
+                    });
+                    await __Set_TOut(2000);
+                    if (runParams === undefined) {
+                        await page.waitForSelector('.nc_iconfont.btn_slide');
+                        let sliderElement = await page.$('.slidetounlock');
+                        let slider = await sliderElement.boundingBox();
 
+                        let slideHandle = await page.$('.nc_iconfont.btn_slide');
+                        let handle = await slideHandle.boundingBox();
+
+                        await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+                        await page.mouse.down();
+                        await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
+                        await page.mouse.up();
+                        await __Set_TOut(3000);
+                    }
+                    delete runParams;
+                    let isRunAgain = await page.evaluate(() => {
+                        return window.runParams;
+                    });
+                    if (isRunAgain !== undefined) {
+                        isRun = false;
+                    }
+                    delete isRunAgain;
+                }
+            }
+        }
+        else {
+            let isRun = true;
+            while (isRun == true) {
+                await page.goto(url, { waitUntil: 'domcontentloaded' });
+                let runParams = await page.evaluate(() => {
+                    return window.runParams;
+                });
+                await __Set_TOut(2000);
+                if (runParams === undefined) {
+                    await page.waitForSelector('.nc_iconfont.btn_slide');
+                    let sliderElement = await page.$('.slidetounlock');
+                    let slider = await sliderElement.boundingBox();
+
+                    let slideHandle = await page.$('.nc_iconfont.btn_slide');
+                    let handle = await slideHandle.boundingBox();
+
+                    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+                    await page.mouse.down();
+                    await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
+                    await page.mouse.up();
+                    await __Set_TOut(3000);
+                }
+                delete runParams;
+                let isRunAgain = await page.evaluate(() => {
+                    return window.runParams;
+                });
+                if (isRunAgain !== undefined) {
+                    isRun = false;
+                }
+                delete isRunAgain;
+            }
+        }
+
+
+        delete redifineCategory;
+    }
 };
 
 
@@ -68,7 +168,7 @@ let __Height = 1200;
 
 
 let loopSubCategory = async () => {
-    let __UA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36';
+    let __UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36';
     let __Email = __Mp.split("|")[0].trim();
     let __Password = __Mp.split("|")[1].trim();
 
@@ -189,298 +289,19 @@ let loopSubCategory = async () => {
         }
         catch (ex) {
             console.log("err: " + ex);
+            browser.close();
             process.exit(0);
         }
-
-        for (var cat in urlCategory) {
-            if (((__catUrlDetails[cat].resultCount / 60) <= 0)) {
-                var urlItem = cat.url + '&page=1&isrefine=y';
-                await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
-                let windowRunParam = await page.evaluate(() => {
-                    return window.runParams || "udfi";
-                });
-                if (windowRunParam === "udfi") {
-                    await page.waitForSelector('.nc_iconfont.btn_slide');
-                    let sliderElement = await page.$('.slidetounlock');
-                    let slider = await sliderElement.boundingBox();
-
-                    let slideHandle = await page.$('.nc_iconfont.btn_slide');
-                    let handle = await slideHandle.boundingBox();
-
-                    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
-                    await page.mouse.down();
-                    await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
-                    await page.mouse.up();
-                    await __Set_TOut(3000);
-                }
-                let categoryName = "";
-                let pathCategories = "";
-
-                var redifineCategory = await page.evaluate(() => {
-                    return window.runParams === undefined ? undefined : window.runParams.refineCategory;
-                });
-
-                try {
-                    if (redifineCategory === undefined) {
-                        await page.waitForSelector('.nc_iconfont.btn_slide');
-                        let sliderElement = await page.$('.slidetounlock');
-                        let slider = await sliderElement.boundingBox();
-
-                        let slideHandle = await page.$('.nc_iconfont.btn_slide');
-                        let handle = await slideHandle.boundingBox();
-
-                        await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
-                        await page.mouse.down();
-                        await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
-                        await page.mouse.up();
-                        await __Set_TOut(3000);
-                    }
-                    else {
-                        if (redifineCategory.length > 0) {
-                            categoryName = redifineCategory[0].categoryName;
-                            if (redifineCategory[0].pathCategories != undefined && redifineCategory[0].pathCategories.length > 0) {
-                                for (var g in redifineCategory[0].pathCategories) {
-                                    if (pathCategories === "") {
-                                        pathCategories += redifineCategory[0].pathCategories[g].categoryEnName;
-                                    }
-                                    else {
-                                        pathCategories += "|" + redifineCategory[0].pathCategories[g].categoryEnName;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (ex) {
-                    console.log(">?: " + ex);
-                }
-
-                let runParams = windowRunParam.items;
-                let count = 0;
-                for (let i in runParams) {
-                    try {
-                        count += 1;
-                        let crawlItem = {
-                            categoryId: -1,
-                            categoryName: "",
-                            pathCategories: "",
-                            productId: -1,
-                            productName: "",
-                            productSkuProps: "",
-                            description: "",
-                            buyingPrice: "",
-                            itemLot: "",
-                            brandName: "",
-                            stockNumber: 0,
-                            storeId: 0,
-                            storeName: "",
-                            storeYear: "",
-                            storeRating: "",
-                            storeRatingTotal: 0,
-                            orderNumber: 0,
-                            ratingNumber: 0,
-                            ratingPercentNumber: "",
-                            shippingContent: "",
-                            imagePathList: "",
-                            specificationHtml: "",
-                            storeRatingMultiple: "",
-                            productSKUPropertyList: "",
-                            skuPriceList: "",
-                            specification1: "",
-                            specification2: "",
-                            specification3: "",
-                            specification4: "",
-                            specification5: "",
-                        };
-
-
-                        let item = runParams[i];
-
-                        var productDetailUrl = 'https:' + item.productDetailUrl;
-                        await page.goto(productDetailUrl, { waitUntil: 'domcontentloaded' });
-
-                        AutoSlide(page, productDetailUrl);
-
-                        let windowrunParams = await page.evaluate(() => {
-                            return window.runParams || "udfi";
-                        });
-
-                        crawlItem.categoryName = categoryName;
-                        crawlItem.pathCategories = pathCategories;
-                        crawlItem.productSKUPropertyList = windowrunParams.data.skuModule.productSKUPropertyList != undefined ? JSON.stringify(windowrunParams.data.skuModule.productSKUPropertyList) : "";
-                        crawlItem.skuPriceList = JSON.stringify(windowrunParams.data.skuModule.skuPriceList);
-
-
-                        crawlItem.categoryId = windowrunParams.data.commonModule.categoryId;
-                        crawlItem.productId = windowrunParams.data.commonModule.productId;
-                        crawlItem.productName = windowrunParams.data.titleModule.subject;
-
-                        //get description
-                        await page.evaluate(() => window.scrollTo(0, 1000));
-                        await page.waitForSelector('.product-overview');
-                        await page.$('.product-overview');
-                        let text = await page.evaluate(() => document.getElementsByClassName('product-overview')[0].innerHTML);
-                        let textJson = JSON.stringify(text);
-
-                        let textReplace = textJson.replace('<span>', '::span::');
-                        textReplace = textReplace.replace('</span>', '::_span::');
-                        textReplace = textReplace.replace('<strong>', '::strong::');
-                        textReplace = textReplace.replace('</strong>', '::_strong::');
-                        textReplace = textReplace.replace(/<script>.*?<\/script>/ig, "");
-                        let newString = textReplace.replace(/<.*?>/ig, "");
-
-                        let description = newString.replace('::span::', '<span>');
-                        description = description.replace('::_span::', '</span>');
-                        description = description.replace('::strong::', '<strong>');
-                        description = description.replace('::_strong::', '</strong>');
-
-                        crawlItem.description = description;
-
-                        crawlItem.buyingPrice = windowrunParams.data.priceModule.formatedActivityPrice;
-                        crawlItem.itemLot = windowrunParams.data.priceModule.lot == true ? windowrunParams.data.priceModule.numberPerLot
-                            + " " + windowrunParams.data.priceModule.oddUnitName : "";
-                        if (windowrunParams.data.specsModule.props.length > 1) {
-                            for (let prop in windowrunParams.data.specsModule.props) {
-                                if (windowrunParams.data.specsModule.props[prop].attrNameId == 2) {
-                                    crawlItem.brandName = windowrunParams.data.specsModule.props[prop].attrValue;
-                                }
-                            }
-                        }
-                        crawlItem.stockNumber = windowrunParams.data.quantityModule.totalAvailQuantity;
-                        crawlItem.storeId = windowrunParams.data.storeModule.storeNum;
-                        crawlItem.storeName = windowrunParams.data.storeModule.storeName;
-                        crawlItem.storeYear = windowrunParams.data.storeModule.openTime;
-                        crawlItem.storeRating = windowrunParams.data.storeModule.positiveRate;
-                        crawlItem.storeRatingTotal = windowrunParams.data.storeModule.positiveNum;
-                        crawlItem.orderNumber = windowrunParams.data.titleModule.tradeCount;
-                        crawlItem.ratingNumber = windowrunParams.data.titleModule.feedbackRating.totalValidNum;
-                        crawlItem.ratingPercentNumber = windowrunParams.data.titleModule.feedbackRating.averageStar;
-
-                        let imgPathes = "";
-                        if (windowrunParams.data.imageModule.imagePathList.length > 0) {
-                            for (let img in windowrunParams.data.imageModule.imagePathList) {
-                                imgPathes += imgPathes === "" ? windowrunParams.data.imageModule.imagePathList[img] : "|" + windowrunParams.data.imageModule.imagePathList[img];
-                            }
-                        }
-                        crawlItem.imagePathList = imgPathes;
-
-                        let specHtml = "";
-                        let restrictionKey = "Brand Name,Certification,Model Number,Size,Length,Height,Width,Wide,Quantity,Pcs";
-                        let specCount = 0;
-                        if (windowrunParams.data.specsModule.props.length > 0) {
-                            for (let elementPath in windowrunParams.data.specsModule.props) {
-
-                                if (restrictionKey.indexOf(windowrunParams.data.specsModule.props[elementPath].attrName) === -1) {
-                                    if (specCount < 11) {
-                                        specHtml += "<p>" + windowrunParams.data.specsModule.props[elementPath].attrName + " : "
-                                            + windowrunParams.data.specsModule.props[elementPath].attrValue + "</p>";
-                                    }
-                                    if (crawlItem.specification1 == "") {
-                                        crawlItem.specification1 = windowrunParams.data.specsModule.props[elementPath].attrName
-                                            + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-                                    }
-                                    else if (crawlItem.specification2 == "") {
-                                        crawlItem.specification2 = windowrunParams.data.specsModule.props[elementPath].attrName
-                                            + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-                                    }
-                                    else if (crawlItem.specification3 == "") {
-                                        crawlItem.specification3 = windowrunParams.data.specsModule.props[elementPath].attrName
-                                            + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-                                    }
-                                    else if (crawlItem.specification4 == "") {
-                                        crawlItem.specification4 = windowrunParams.data.specsModule.props[elementPath].attrName
-                                            + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-                                    }
-                                    else if (crawlItem.specification5 == "") {
-                                        crawlItem.specification5 = windowrunParams.data.specsModule.props[elementPath].attrName
-                                            + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-                                    }
-                                    specCount += 1;
-                                }
-
-                            }
-                        }
-
-                        crawlItem.specificationHtml = specHtml;
-
-                        if (await page.$('#store-info-wrap > div.store-container > .store-name') !== null) {
-                            await page.evaluate(() => window.scrollTo(0, 0));
-
-                            await page.evaluate(x => {
-                                const __Scrollable_Section = document.querySelector(x);
-
-                                __Scrollable_Section.scrollTop = __Scrollable_Section.offsetHeight;
-                            }, '.product-title');
-                            __Data_AJAX = "";
-                            __Prepairing_Ajax = false;
-                            __Done_Url_AJAX = false;
-                            await page.waitForSelector('#store-info-wrap > div.store-container > .store-name', { timeout: 2000, visible: true })
-                                .then(async () => {
-                                    let __Ajax_X = await page.evaluate(() => {
-                                        const docALL = document.querySelector('#store-info-wrap > div.store-container');
-                                        return docALL.getBoundingClientRect().x;
-                                    });
-                                    let __Ajax_Y = await page.evaluate(() => {
-                                        const docALL = document.querySelector('#store-info-wrap > div.store-container');
-                                        return docALL.getBoundingClientRect().y;
-                                    });
-                                    let __Ajax_W = await page.evaluate(() => {
-                                        const docALL = document.querySelector('#store-info-wrap > div.store-container');
-                                        return docALL.getBoundingClientRect().width;
-                                    });
-                                    let __Ajax_H = await page.evaluate(() => {
-                                        const docALL = document.querySelector('#store-info-wrap > div.store-container');
-                                        return docALL.getBoundingClientRect().height;
-                                    });
-                                    __Data_AJAX = "";
-                                    __Done_Url_AJAX = false;
-                                    __Prepairing_Ajax = true;
-                                    await page.mouse.move(__Ajax_X + __Ajax_W / 2, __Ajax_Y + __Ajax_H / 2);
-                                    await page.waitForResponse(response => response.url().indexOf("/display/evaluationDsrAjaxService.htm?callback=") !== -1 && response.status() === 200);
-                                    await __Set_TOut(500);
-
-                                    crawlItem.storeRatingMultiple = __Data_AJAX;
-                                }).catch(async (err) => {
-                                });
-                        }
-
-                        if (await page.$('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link') !== null) {
-                            __Data_Shipping_jSon = "";
-                            __Done_Url = false;
-                            await page.waitForSelector('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link', { timeout: 2000 })
-                                .then(async () => {
-                                    await page.click('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link');
-                                    await __Set_TOut(500);
-
-                                    crawlItem.shippingContent = __Data_Shipping_jSon;
-                                }).catch(async (err) => {
-                                });
-                        }
-
-                        //result.push(crawlItem);
-                        // //end crawl
-                        rpss.push(crawlItem);
-                        if (count == 3) {
-                            console.log(JSON.stringify(rpss));
-                            await browser.close();
-                            process.exit(0);
-                        }
-
-                    }
-                    catch (ex) {
-                        console.log("Error: " + ex);
-                        console.log(item.productDetailUrl);
-                    }
-                }
-
-            }
-            else {
-                let numPage = Math.floor((parseInt(urlCategory[cat].resultCount) / 60)) < (parseInt(urlCategory[cat].resultCount) / 60)
+        try {
+            for (var cat in urlCategory) {
+                let numPage = (parseInt(urlCategory[cat].resultCount) / 60) <= 1 ? 1 : Math.floor((parseInt(urlCategory[cat].resultCount) / 60)) < (parseInt(urlCategory[cat].resultCount) / 60)
                     ? Math.floor((parseInt(urlCategory[cat].resultCount) / 60)) + 1 : Math.floor((parseInt(urlCategory[cat].resultCount) / 60));
 
                 let categoryName = "";
                 let pathCategories = "";
 
+                await AutoSlide(page, urlCategory[cat].url, true);
+
                 var redifineCategory = await page.evaluate(() => {
                     return window.runParams === undefined ? undefined : window.runParams.refineCategory;
                 });
@@ -517,12 +338,13 @@ let loopSubCategory = async () => {
                     }
                 }
                 catch (ex) {
-                    console.log(">?: " + ex);
+                    //console.log(">?: " + ex);
+                    continue;
                 }
                 for (let i = 1; i <= numPage; i++) {
                     var urlItem = urlCategory[cat].url + '&page=' + i + '&isrefine=y';
                     await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
-                    AutoSlide(page, urlItem);
+                    await AutoSlide(page, urlItem, true);
                     let windowRunParam = await page.evaluate(() => {
                         return window.runParams;
                     });
@@ -570,9 +392,10 @@ let loopSubCategory = async () => {
                             let item = runParams[i];
 
                             var productDetailUrl = 'https:' + item.productDetailUrl;
+
                             await page.goto(productDetailUrl, { waitUntil: 'domcontentloaded' });
 
-                            AutoSlide(page, productDetailUrl);
+                            await AutoSlide(page, productDetailUrl, false);
 
                             let windowrunParams = await page.evaluate(() => {
                                 return window.runParams || "udfi";
@@ -590,22 +413,30 @@ let loopSubCategory = async () => {
 
                             //get description
                             await page.evaluate(() => window.scrollTo(0, 1000));
-                            await page.waitForSelector('.product-overview');
-                            await page.$('.product-overview');
+                            await page.waitForSelector('.product-overview', { timeout: 2000 }).then(
+                                async () => {
+                                    await page.$('.product-overview');
+                                    let text = await page.evaluate(() => document.getElementsByClassName('product-overview')[0].innerHTML);
 
-                            let text = await page.evaluate(() => document.getElementsByClassName('product-overview')[0].innerHTML);
-                            let textJson = JSON.stringify(text);
-                            let textReplace = textJson.replace('<span>', '::span::');
-                            textReplace = textReplace.replace('</span>', '::_span::');
-                            textReplace = textReplace.replace('<strong>', '::strong::');
-                            textReplace = textReplace.replace('</strong>', '::_strong::');
-                            textReplace = textReplace.replace(/<script>.*?<\/script>/ig, "");
-                            let newString = textReplace.replace(/<.*?>/ig, "");
-                            let description = newString.replace('::span::', '<span>');
-                            description = description.replace('::_span::', '</span>');
-                            description = description.replace('::strong::', '<strong>');
-                            description = description.replace('::_strong::', '</strong>');
-                            crawlItem.description = description;
+                                    let textJson = JSON.stringify(text);
+                                    let textReplace = textJson.replace(/<span>/g, '::span::');
+                                    textReplace = textReplace.replace(/<\/span>/g, '::_span::');
+                                    textReplace = textReplace.replace(/<\/td>/g, '____');
+                                    textReplace = textReplace.replace(/(<span[^>]+>)/ig, '::span::');
+
+
+                                    textReplace = textReplace.replace(/<strong>/g, '::strong::');
+                                    textReplace = textReplace.replace(/<\/strong>/g, '::_strong::');
+                                    textReplace = textReplace.replace(/<script>.*?<\/script>/ig, "");
+                                    let newString = textReplace.replace(/<.*?>/ig, "");
+                                    //let newString = textReplace.replace(/<(?!span\s*\/?)[^>]+>/ig, "");
+                                    let description = newString.replace('::span::', '<span>');
+                                    description = description.replace('::_span::', '</span>');
+                                    description = description.replace('::strong::', '<strong>');
+                                    description = description.replace('::_strong::', '</strong>');
+                                    crawlItem.description = description;
+                                }).catch(async (err) => {
+                                });
 
                             // let text = await page.evaluate(() => document.querySelectorAll('.product-overview')[0].innerText);
                             // crawlItem.description = JSON.stringify(text);
@@ -627,8 +458,16 @@ let loopSubCategory = async () => {
                             crawlItem.storeRating = windowrunParams.data.storeModule.positiveRate;
                             crawlItem.storeRatingTotal = windowrunParams.data.storeModule.positiveNum;
                             crawlItem.orderNumber = windowrunParams.data.titleModule.tradeCount;
-                            crawlItem.ratingNumber = windowrunParams.data.titleModule.feedbackRating.totalValidNum;
-                            crawlItem.ratingPercentNumber = windowrunParams.data.titleModule.feedbackRating.averageStar;
+                            if (windowrunParams.data.titleModule.feedbackRating != undefined) {
+                                if (windowrunParams.data.titleModule.feedbackRating.hasOwnProperty('totalValidNum')) {
+                                    crawlItem.ratingNumber = windowrunParams.data.titleModule.feedbackRating.totalValidNum;
+                                }
+                                if (windowrunParams.data.titleModule.feedbackRating.hasOwnProperty('averageStar')) {
+                                    crawlItem.ratingPercentNumber = windowrunParams.data.titleModule.feedbackRating.averageStar;
+                                }
+                            }
+                            //crawlItem.ratingNumber = windowrunParams.data.titleModule.feedbackRating.hasOwnProperty('totalValidNum') == true ? windowrunParams.data.titleModule.feedbackRating.totalValidNum : 0;;
+                            //crawlItem.ratingPercentNumber = windowrunParams.data.titleModule.feedbackRating.averageStar;
 
                             let imgPathes = "";
                             if (windowrunParams.data.imageModule.imagePathList.length > 0) {
@@ -718,269 +557,50 @@ let loopSubCategory = async () => {
                                     });
                             }
 
-                            if (await page.$('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link') !== null) {
-                                __Data_Shipping_jSon = "";
-                                __Done_Url = false;
-                                await page.waitForSelector('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link', { timeout: 2000 })
-                                    .then(async () => {
-                                        await page.click('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link');
-                                        await __Set_TOut(500);
+                            // if (await page.$('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link') !== null) {
+                            //     __Data_Shipping_jSon = "";
+                            //     __Done_Url = false;
+                            //     await page.waitForSelector('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link', { timeout: 2000 })
+                            //         .then(async () => {
+                            //             await page.click('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link');
+                            //             await __Set_TOut(500);
 
-                                        crawlItem.shippingContent = __Data_Shipping_jSon;
-                                    }).catch(async (err) => {
-                                    });
-                            }
+                            //             crawlItem.shippingContent = __Data_Shipping_jSon;
+                            //         }).catch(async (err) => {
+                            //         });
+                            // }
 
-                            //result.push(crawlItem);
-                            // //end crawl
                             rpss.push(crawlItem);
-                            if (count == 3) {
-                                console.log(JSON.stringify(rpss));
-                                await browser.close();
-                                process.exit(0);
-                            }
+                            // if (true) {
+                            //     //break;
+                            //     console.log(JSON.stringify(rpss));
+                            //     await browser.close();
+                            //     process.exit(0);
+                            // }
 
                         }
                         catch (ex) {
-                            console.log("Error: " + ex);
-                            console.log(item.productDetailUrl);
+                            continue;
+                            //console.log("Error: " + ex);
                         }
                     }
                 }
-
             }
         }
+        catch (ex) {
+            console.log(JSON.stringify(ex));
+            await browser.close();
+            process.exit(0);
+        }
+
         console.log(JSON.stringify(rpss));
         await browser.close();
         process.exit(0);
     };
 }
-// let getItemDetail = async (browser, page, runParams, categoryName, pathCategories) => {
-//     let count = 0;
-//     let result = [];
-//     for (let i in runParams) {
-//         try {
-//             count += 1;
-//             let crawlItem = {
-//                 categoryId: -1,
-//                 categoryName: "",
-//                 pathCategories: "",
-//                 productId: -1,
-//                 productName: "",
-//                 productSkuProps: "",
-//                 description: "",
-//                 buyingPrice: "",
-//                 itemLot: "",
-//                 brandName: "",
-//                 stockNumber: 0,
-//                 storeId: 0,
-//                 storeName: "",
-//                 storeYear: "",
-//                 storeRating: "",
-//                 storeRatingTotal: 0,
-//                 orderNumber: 0,
-//                 ratingNumber: 0,
-//                 ratingPercentNumber: "",
-//                 shippingContent: "",
-//                 imagePathList: "",
-//                 specificationHtml: "",
-//                 storeRatingMultiple: "",
-//                 productSKUPropertyList: "",
-//                 skuPriceList: "",
-//                 specification1: "",
-//                 specification2: "",
-//                 specification3: "",
-//                 specification4: "",
-//                 specification5: "",
-//             };
-
-
-//             let item = runParams[i];
-
-//             var productDetailUrl = 'https:' + item.productDetailUrl;
-//             await page.goto(productDetailUrl, { waitUntil: 'domcontentloaded' });
-
-//             AutoSlide(page, productDetailUrl);
-
-//             let windowrunParams = await page.evaluate(() => {
-//                 return window.runParams || "udfi";
-//             });
-
-//             crawlItem.categoryName = categoryName;
-//             crawlItem.pathCategories = pathCategories;
-//             crawlItem.productSKUPropertyList = windowrunParams.data.skuModule.productSKUPropertyList != undefined ? JSON.stringify(windowrunParams.data.skuModule.productSKUPropertyList) : "";
-//             crawlItem.skuPriceList = JSON.stringify(windowrunParams.data.skuModule.skuPriceList);
-
-
-//             crawlItem.categoryId = windowrunParams.data.commonModule.categoryId;
-//             crawlItem.productId = windowrunParams.data.commonModule.productId;
-//             crawlItem.productName = windowrunParams.data.titleModule.subject;
-
-//             //get description
-//             await page.evaluate(() => window.scrollTo(0, 1000));
-//             await page.waitForSelector('.product-overview');
-//             await page.$('.product-overview');
-//             let text = await page.evaluate(() => document.getElementsByClassName('product-overview')[0].innerHTML);
-//             let textJson = JSON.stringify(text);
-
-//             let textReplace = textJson.replace('<span>', '::span::');
-//             textReplace = textReplace.replace('</span>', '::_span::');
-//             textReplace = textReplace.replace('<strong>', '::strong::');
-//             textReplace = textReplace.replace('</strong>', '::_strong::');
-//             textReplace = textReplace.replace(/<script>.*?<\/script>/ig, "");
-//             let newString = textReplace.replace(/<.*?>/ig, "");
-
-//             let description = newString.replace('::span::', '<span>');
-//             description = description.replace('::_span::', '</span>');
-//             description = description.replace('::strong::', '<strong>');
-//             description = description.replace('::_strong::', '</strong>');
-
-//             crawlItem.description = description;
-
-//             crawlItem.buyingPrice = windowrunParams.data.priceModule.formatedActivityPrice;
-//             crawlItem.itemLot = windowrunParams.data.priceModule.lot == true ? windowrunParams.data.priceModule.numberPerLot
-//                 + " " + windowrunParams.data.priceModule.oddUnitName : "";
-//             if (windowrunParams.data.specsModule.props.length > 1) {
-//                 for (let prop in windowrunParams.data.specsModule.props) {
-//                     if (windowrunParams.data.specsModule.props[prop].attrNameId == 2) {
-//                         crawlItem.brandName = windowrunParams.data.specsModule.props[prop].attrValue;
-//                     }
-//                 }
-//             }
-//             crawlItem.stockNumber = windowrunParams.data.quantityModule.totalAvailQuantity;
-//             crawlItem.storeId = windowrunParams.data.storeModule.storeNum;
-//             crawlItem.storeName = windowrunParams.data.storeModule.storeName;
-//             crawlItem.storeYear = windowrunParams.data.storeModule.openTime;
-//             crawlItem.storeRating = windowrunParams.data.storeModule.positiveRate;
-//             crawlItem.storeRatingTotal = windowrunParams.data.storeModule.positiveNum;
-//             crawlItem.orderNumber = windowrunParams.data.titleModule.tradeCount;
-//             crawlItem.ratingNumber = windowrunParams.data.titleModule.feedbackRating.totalValidNum;
-//             crawlItem.ratingPercentNumber = windowrunParams.data.titleModule.feedbackRating.averageStar;
-
-//             let imgPathes = "";
-//             if (windowrunParams.data.imageModule.imagePathList.length > 0) {
-//                 for (let img in windowrunParams.data.imageModule.imagePathList) {
-//                     imgPathes += imgPathes === "" ? windowrunParams.data.imageModule.imagePathList[img] : "|" + windowrunParams.data.imageModule.imagePathList[img];
-//                 }
-//             }
-//             crawlItem.imagePathList = imgPathes;
-
-//             let specHtml = "";
-//             let restrictionKey = "Brand Name,Certification,Model Number,Size,Length,Height,Width,Wide,Quantity,Pcs";
-//             let specCount = 0;
-//             if (windowrunParams.data.specsModule.props.length > 0) {
-//                 for (let elementPath in windowrunParams.data.specsModule.props) {
-
-//                     if (restrictionKey.indexOf(windowrunParams.data.specsModule.props[elementPath].attrName) === -1) {
-//                         if (specCount < 11) {
-//                             specHtml += "<p>" + windowrunParams.data.specsModule.props[elementPath].attrName + " : "
-//                                 + windowrunParams.data.specsModule.props[elementPath].attrValue + "</p>";
-//                         }
-//                         if (crawlItem.specification1 == "") {
-//                             crawlItem.specification1 = windowrunParams.data.specsModule.props[elementPath].attrName
-//                                 + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-//                         }
-//                         else if (crawlItem.specification2 == "") {
-//                             crawlItem.specification2 = windowrunParams.data.specsModule.props[elementPath].attrName
-//                                 + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-//                         }
-//                         else if (crawlItem.specification3 == "") {
-//                             crawlItem.specification3 = windowrunParams.data.specsModule.props[elementPath].attrName
-//                                 + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-//                         }
-//                         else if (crawlItem.specification4 == "") {
-//                             crawlItem.specification4 = windowrunParams.data.specsModule.props[elementPath].attrName
-//                                 + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-//                         }
-//                         else if (crawlItem.specification5 == "") {
-//                             crawlItem.specification5 = windowrunParams.data.specsModule.props[elementPath].attrName
-//                                 + ": " + windowrunParams.data.specsModule.props[elementPath].attrValue;
-//                         }
-//                         specCount += 1;
-//                     }
-
-//                 }
-//             }
-
-//             crawlItem.specificationHtml = specHtml;
-
-//             if (await page.$('#store-info-wrap > div.store-container > .store-name') !== null) {
-//                 await page.evaluate(() => window.scrollTo(0, 0));
-
-//                 await page.evaluate(x => {
-//                     const __Scrollable_Section = document.querySelector(x);
-
-//                     __Scrollable_Section.scrollTop = __Scrollable_Section.offsetHeight;
-//                 }, '.product-title');
-//                 __Data_AJAX = "";
-//                 __Prepairing_Ajax = false;
-//                 __Done_Url_AJAX = false;
-//                 await page.waitForSelector('#store-info-wrap > div.store-container > .store-name', { timeout: 2000, visible: true })
-//                     .then(async () => {
-//                         let __Ajax_X = await page.evaluate(() => {
-//                             const docALL = document.querySelector('#store-info-wrap > div.store-container');
-//                             return docALL.getBoundingClientRect().x;
-//                         });
-//                         let __Ajax_Y = await page.evaluate(() => {
-//                             const docALL = document.querySelector('#store-info-wrap > div.store-container');
-//                             return docALL.getBoundingClientRect().y;
-//                         });
-//                         let __Ajax_W = await page.evaluate(() => {
-//                             const docALL = document.querySelector('#store-info-wrap > div.store-container');
-//                             return docALL.getBoundingClientRect().width;
-//                         });
-//                         let __Ajax_H = await page.evaluate(() => {
-//                             const docALL = document.querySelector('#store-info-wrap > div.store-container');
-//                             return docALL.getBoundingClientRect().height;
-//                         });
-//                         __Data_AJAX = "";
-//                         __Done_Url_AJAX = false;
-//                         __Prepairing_Ajax = true;
-//                         await page.mouse.move(__Ajax_X + __Ajax_W / 2, __Ajax_Y + __Ajax_H / 2);
-//                         await page.waitForResponse(response => response.url().indexOf("/display/evaluationDsrAjaxService.htm?callback=") !== -1 && response.status() === 2000);
-//                         await __Set_TOut(500);
-
-//                         crawlItem.storeRatingMultiple = __Data_AJAX;
-//                     }).catch(async (err) => {
-//                         console.log("1: " + err);
-//                     });
-//             }
-
-//             if (await page.$('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link') !== null) {
-//                 __Data_Shipping_jSon = "";
-//                 __Done_Url = false;
-//                 await page.waitForSelector('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link', { timeout: 2000 })
-//                     .then(async () => {
-//                         await page.click('#root > div > div.product-main > div > div.product-info > div.product-shipping > span.product-shipping-info.black-link');
-//                         await __Set_TOut(500);
-
-//                         crawlItem.shippingContent = __Data_Shipping_jSon;
-//                     }).catch(async (err) => {
-//                         console.log("2: " + err);
-//                     });
-//             }
-
-//             result.push(crawlItem);
-//             // //end crawl
-//             // // rpss.push(crawlItem);
-//             // if (count == 3) {
-//             //     console.log(JSON.stringify(result));
-//             //     await browser.close();
-//             //     process.exit(0);
-//             // }
-
-//         }
-//         catch (ex) {
-//             console.log("Error: " + ex);
-//             console.log(item.productDetailUrl);
-//         }
-//     }
-//     return result;
-
-// };
 
 let registerNewAccount = async () => {
-    let __UA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36';
+    let __UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36';
     let __Email = __Mp.split("|")[0].trim();
     let __Password = __Mp.split("|")[1].trim();
 
@@ -1038,11 +658,11 @@ let registerNewAccount = async () => {
 
     await page.on('response', async (response) => {
         let responseUrl = response.url();
-        if (responseUrl.indexOf("/aeglodetailweb/api/logistics/freight") != -1) {
-            __Data_Shipping_jSon = await response.text();
-            __Done_Url = true;
-        }
-        else if (responseUrl.startsWith('https://feedback.aliexpress.com') && responseUrl.indexOf('/display/evaluationDsrAjaxService.htm?callback=') != -1) {
+        // if (responseUrl.indexOf("/aeglodetailweb/api/logistics/freight") != -1) {
+        //     __Data_Shipping_jSon = await response.text();
+        //     __Done_Url = true;
+        // }
+        if (responseUrl.startsWith('https://feedback.aliexpress.com') && responseUrl.indexOf('/display/evaluationDsrAjaxService.htm?callback=') != -1) {
             if (__Prepairing_Ajax) {
                 var jQuery = await response.text();
                 if (JSON.stringify(jQuery).indexOf('jQuery') !== -1) {
@@ -1060,104 +680,114 @@ let registerNewAccount = async () => {
 
     if (__isCategory == "True") {
 
-        let urlItem = 'https://www.aliexpress.com/category/' + _loginUrlId + '/patches.html?trafficChannel=main&catName=patches&CatId=' + _loginUrlId + '&ltype=wholesale&SortType=default&page=' + 1 + '&isrefine=y';
-        await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
+        try {
+            let urlItem = 'https://www.aliexpress.com/category/' + _loginUrlId + '/bolts.html?trafficChannel=main&catName=bolts&CatId=' + _loginUrlId + '&SortType=default&page=' + 1 + '&isrefine=y';
 
-        AutoSlide(page, urlItem);
+            await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
 
-        let runConfigs = await page.evaluate(() => {
-            return window.runConfigs || "udfi";
-        });
+            await __Set_TOut(5000);
 
-        if (runConfigs !== "udfi") {
-            let realCatName = runConfigs.searchQuery.catName;
+            await AutoSlide(page, urlItem, true);
 
-            let isContinute = true;
-            let min = 0.1;
-            let max = 100;
-            let searchCount = 0;
+            await __Set_TOut(5000);
 
+            let runConfigs = await page.evaluate(() => {
+                return window.runConfigs || "udfi";
+            });
 
-            let minMaxResult = [];
-            let urlWithMinMax = [];
+            if (runConfigs != "udfi") {
 
-            while (isContinute) {
+                let realCatName = runConfigs.searchQuery.catName;
 
-                urlItem = 'https://www.aliexpress.com/category/' + _loginUrlId + '/' + realCatName + '.html?trafficChannel=main&catName='
-                    + realCatName + '&CatId=' + _loginUrlId + '&ltype=wholesale&SortType=total_tranpro_desc&' + '&minPrice=' + min + '&maxPrice=' + max + '&page=1&isrefine=y';
-
-                await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
-
-                let currentWindowRunParam = await page.evaluate(() => {
-                    return window.runParams || "udfi";
-                });
-
-                if (currentWindowRunParam === "udfi") {
-                    await page.waitForSelector('.nc_iconfont.btn_slide');
-                    let sliderElement = await page.$('.slidetounlock');
-                    let slider = await sliderElement.boundingBox();
-
-                    let slideHandle = await page.$('.nc_iconfont.btn_slide');
-                    let handle = await slideHandle.boundingBox();
-
-                    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
-                    await page.mouse.down();
-                    await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
-                    await page.mouse.up();
-                    await __Set_TOut(3000);
-                }
-
-                if (currentWindowRunParam.resultCount == 0 && minMaxResult.length > 0) {
-                    isContinute = false;
-                }
-                else {
-                    if (currentWindowRunParam.resultCount <= 3600) {
-                        minMaxResult.push({ min: min, max: max, resultCount: currentWindowRunParam.resultCount });
-
-                        urlWithMinMax.push({
-                            min: min,
-                            max: max,
-                            resultCount: currentWindowRunParam.resultCount,
-                            url: urlItem
-                        });
+                let isContinute = true;
+                let min = 0.1;
+                let max = 100;
 
 
-                        searchCount = currentWindowRunParam.resultCount;
+                let minMaxResult = [];
+                let urlWithMinMax = [];
 
-                        let range = max - min;
-                        min = max;
-                        max += range;
+
+                while (isContinute) {
+
+                    urlItem = 'https://www.aliexpress.com/category/' + _loginUrlId + '/' + realCatName + '.html?trafficChannel=main&catName='
+                        + realCatName + '&CatId=' + _loginUrlId + '&SortType=total_tranpro_desc&' + '&minPrice=' + (Math.round(min * 100) / 100).toFixed(2) + '&maxPrice=' + (Math.round(max * 100) / 100).toFixed(2) + '&page=1&isrefine=y';
+
+                    await page.goto(urlItem, { waitUntil: 'domcontentloaded' });
+
+                    await AutoSlide(page, urlItem, false);
+
+                    let currentWindowRunParam = await page.evaluate(() => {
+                        return window.runParams || "udfi";
+                    });
+
+                    if (currentWindowRunParam === "udfi") {
+                        await page.waitForSelector('.nc_iconfont.btn_slide');
+                        let sliderElement = await page.$('.slidetounlock');
+                        let slider = await sliderElement.boundingBox();
+
+                        let slideHandle = await page.$('.nc_iconfont.btn_slide');
+                        let handle = await slideHandle.boundingBox();
+
+                        await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+                        await page.mouse.down();
+                        await page.mouse.move(handle.x + slider.width, handle.y + handle.height / 2, { steps: 50 });
+                        await page.mouse.up();
+                        await __Set_TOut(3000);
+                    }
+
+                    if (currentWindowRunParam.resultCount == 0 && minMaxResult.length > 0) {
+                        isContinute = false;
                     }
                     else {
-                        if (min == 0.1) {
-                            min = min;
-                            max = max / 2;
-                        }
-                        else {
+                        if (currentWindowRunParam.resultCount <= 3600) {
+                            minMaxResult.push({ min: (Math.round(min * 100) / 100).toFixed(2), max: (Math.round(max * 100) / 100).toFixed(2), resultCount: currentWindowRunParam.resultCount });
+
+                            urlWithMinMax.push({
+                                min: (Math.round(min * 100) / 100).toFixed(2),
+                                max: (Math.round(max * 100) / 100).toFixed(2),
+                                resultCount: currentWindowRunParam.resultCount,
+                                url: urlItem
+                            });
+
                             let range = max - min;
                             min = max;
-                            max = max + (range / 2);
+                            max += range;
+                        }
+                        else {
+                            if (min == 0.1) {
+                                min = min;
+                                max = max / 2;
+                            }
+                            else {
+                                let range = max - min;
+                                min = max;
+                                max = max + (range / 2);
+                            }
+                        }
+                        if (currentWindowRunParam.resultCount < 100) {
+                            min = min;
+                            max = max + ((max - min) * 2);
                         }
                     }
-                    if ((max - min) < 0.5) {
-                        min = min;
-                        max = max + 20;
-                    }
+                    delete currentWindowRunParam;
+                    await __Set_TOut(1000);
                 }
-                delete currentWindowRunParam;
-                await __Set_TOut(1000);
+
+                let firstPhaseData = {
+                    isFistPhase: true,
+                    data: urlWithMinMax,
+                    email: __Email,
+                    passWord: __Password
+                };
+
+                console.log(JSON.stringify(firstPhaseData));
+                await browser.close();
+                process.exit(0);
             }
-
-            let firstPhaseData = {
-                isFistPhase: true,
-                data: urlWithMinMax,
-                email: __Email,
-                passWord: __Password
-            };
-
-            console.log(JSON.stringify(firstPhaseData));
-            await browser.close();
-            process.exit(0);
+        }
+        catch (ex) {
+            console.log("Error in loop: " + ex);
         }
 
     }
@@ -1227,7 +857,7 @@ let registerNewAccount = async () => {
                     var productDetailUrl = 'https:' + item.productDetailUrl;
                     await page.goto(productDetailUrl, { waitUntil: 'domcontentloaded' });
 
-                    AutoSlide(page, productDetailUrl);
+                    AutoSlide(page, productDetailUrl, false);
 
                     let windowrunParams = await page.evaluate(() => {
                         return window.runParams || "udfi";

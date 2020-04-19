@@ -33,7 +33,14 @@
         <div class="row">&nbsp;</div>
         <div class="row">
             <div class="col-6" style="text-align: right;">
-                <button class="btn btn-primary" id="btnStart" style="width: 120px;">START</button>
+                @if (ViewBag.IsEnabled)
+                {
+                    <button class="btn btn-primary" id="btnStart" style="width: 120px;" disabled="disabled">START</button>
+                }
+                else
+                {
+                    <button class="btn btn-primary" id="btnStart" style="width: 120px;">START</button>
+                }
             </div>
             <div class="col-6">
                 <button  class="btn btn-primary" id="btnCancel" style="width: 120px;">CANCEL ALL</button>
@@ -88,6 +95,9 @@
 
             var id = $(document.activeElement).attr('id');
             if (id === "btnStart") {
+
+                $('#btnStart').prop('disabled', true);
+
                 $.ajax({
                     url: '/Home/RedisCategory',
                     data: $("#frm_ss").serialize()

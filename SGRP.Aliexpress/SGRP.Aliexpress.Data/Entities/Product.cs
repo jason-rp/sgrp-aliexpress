@@ -50,7 +50,7 @@ namespace SGRP.Aliexpress.Data.Entities
 
         public long RatingNumber { get; set; }
 
-        public decimal RatingPercent { get; set; }
+        public string RatingPercent { get; set; }
 
         public string ProcessingTime { get; set; }
 

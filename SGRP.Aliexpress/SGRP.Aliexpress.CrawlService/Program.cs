@@ -64,7 +64,7 @@ namespace SGRP.Aliexpress.CrawlService
                                             {
                                                 try
                                                 {
-                                                    var categoryViewModels = _crawlService.GetData(new List<InputUrlModel>
+                                                    _crawlService.GetData(new List<InputUrlModel>
                                                     {
                                                         new InputUrlModel
                                                         {
@@ -72,7 +72,8 @@ namespace SGRP.Aliexpress.CrawlService
                                                             SignalRKeyId = signalRKeyId
                                                         }
 
-                                                    }).ToList();
+                                                    });
+
                                                     data.Add(url);
                                                     signalRKeyId += 1;
                                                 }
@@ -83,6 +84,7 @@ namespace SGRP.Aliexpress.CrawlService
 
                                             }
                                         }
+
                                     }
                                 }
                                 

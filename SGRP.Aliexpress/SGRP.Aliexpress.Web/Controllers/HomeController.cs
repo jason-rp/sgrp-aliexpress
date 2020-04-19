@@ -23,7 +23,6 @@ namespace SGRP.Aliexpress.Web.Controllers
         private readonly ApplicationDbContext _context;
 
         private readonly AliexpressHub _aliexpressHub;
-        //private ApplicationDbContext _context = new DesignTimeDbContextFactory().CreateDbContext()
 
         public HomeController(ApplicationDbContext context, AliexpressHub aliexpressHub)
         {
@@ -31,25 +30,6 @@ namespace SGRP.Aliexpress.Web.Controllers
             _aliexpressHub = aliexpressHub;
         }
 
-        //[Route("/Home/Index", Name = "AddCat")]
-        //public ActionResult RedisCategory(RedisCategoryUrlModel model)
-        //{
-        //    if (model.Urls.Any())
-        //    {
-        //        var data = new RedisMessageModel
-        //        {
-        //            IsRun = true,
-        //            Urls = new List<string>()
-        //        };
-
-        //        model.Urls.ForEach(n => data.Urls.Add(n));
-
-        //        RedisConnectionFactory.GetConnection().GetSubscriber().Publish("redis::runNode", JsonConvert.SerializeObject(data));
-        //    }
-
-        //    return RedirectToAction("Index");
-
-        //}
 
 
         public void Cancel()
@@ -61,6 +41,7 @@ namespace SGRP.Aliexpress.Web.Controllers
         {
             if (model.Urls.Any())
             {
+                RedisConnectionFactory.GetConnection().GetDatabase().StringSet("redis::isSubmit", "true");
                 var data = new RedisMessageModel
                 {
                     IsRun = true,
@@ -77,7 +58,20 @@ namespace SGRP.Aliexpress.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            _ = Task.Factory.StartNew(async () =>
+            RedisConnectionFactory.GetConnection().GetDatabase().StringSet("redis::isSubmit", "false");
+            var isEnabled = RedisConnectionFactory.GetConnection().GetDatabase().StringGetAsync("redis::isSubmit")
+                .Result.ToString();
+
+            if (!string.IsNullOrEmpty(isEnabled) && isEnabled == "true")
+            {
+                ViewBag.IsEnabled = true;
+            }
+            else
+            {
+                ViewBag.IsEnabled = false;
+            }
+
+            _=Task.Run(async () =>
               {
                   while (true)
                   {

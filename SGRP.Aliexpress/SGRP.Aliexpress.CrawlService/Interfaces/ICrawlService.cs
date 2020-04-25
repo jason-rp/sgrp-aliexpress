@@ -9,6 +9,6 @@ namespace SGRP.Aliexpress.CrawlService.Interfaces
 {
     public interface ICrawlService
     {
-        Task GetData(List<InputUrlModel> urls);
+        Task GetData(List<int> browsers,int browserNumber,List<InputUrlModel> urls);
     }
 }

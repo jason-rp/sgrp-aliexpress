@@ -21,7 +21,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
         private static readonly Random Random = new Random();
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(typeof(CrawlService));
 
-        public async Task GetData(List<InputUrlModel> urls)
+        public async Task GetData(List<int> browsers, int browserNumber, List<InputUrlModel> urls)
         {
             var pid = 1;
             try
@@ -31,7 +31,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
 
                     var executeNodeResult = Node("nodescript.js",
                         "\"" + -101 + "\"" + " \"" + GetLoginUrl(url) + "\"" + " \"" + url.Id + "\"" + " \"" +
-                        url.IsCategory + "\"" + " \"" +
+                        url.IsCategory + "\"" + " \""  + browserNumber + "\""  +" \"" +
                         GetRandomMailPass(Random) + "\"", ref pid);
                     if (executeNodeResult.Count == 1)
                     {
@@ -47,7 +47,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                                 {
                                     var categoryDataRaw = Node("nodescript.js",
                                         "\"" + -110 + "\"" + " \"" + urlDetail.Url + "\"" + " \"" + url.Id + "\"" +
-                                        " \"" + url.IsCategory + "\"" + " \"" +
+                                        " \"" + url.IsCategory + "\"" + " \"" + browserNumber + "\"" + " \"" +
                                         GetRandomMailPass(Random) + "\"" + " \"" +
                                         GetLoginUrl(url) + "\"" + " \"" + JsonConvert.SerializeObject(new List<FirstPhaseUrlModel>
                                         {
@@ -109,6 +109,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
             }
 
             RedisConnectionFactory.GetConnection().GetDatabase().StringSet("redis::isSubmit", "false");
+            browsers.Add(browserNumber);
         }
 
 
@@ -185,7 +186,7 @@ namespace SGRP.Aliexpress.CrawlService.Services
                     }
 
                     __Proc_Start_Info.Verb = "runas";
-                    __Proc_Start_Info.StandardOutputEncoding = Encoding.UTF8;
+                    //__Proc_Start_Info.StandardOutputEncoding = Encoding.UTF8;
 
                     process.StartInfo = __Proc_Start_Info;
                     if (!isDebug)
